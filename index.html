@@ -1,50 +1,48 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Geo Risk Intelligence</title>
-  <link rel="stylesheet" href="style.css">
-  <script src="script.js" defer></script>
+<meta charset="UTF-8">
+<title>Geo Risk Intelligence</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&family=Inter:wght@400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script src="script.js" defer></script>
 </head>
 
 <body>
 
 <section class="hero">
   <h1>Geo Risk Intelligence</h1>
-  <p>Advanced Geopolitical Risk Analytics</p>
+  <p>Global Geopolitical Risk System</p>
 </section>
 
-<section class="map-section">
+<div class="map-container">
+  <img src="world-map.jpg" class="map-img">
 
-<svg viewBox="0 0 1000 500" class="world-map">
-
-  <path id="USA" class="country" d="M150,200 L250,200 L250,250 L150,250 Z"/>
-  <path id="India" class="country" d="M650,300 L700,300 L700,350 L650,350 Z"/>
-  <path id="Pakistan" class="country" d="M620,300 L650,300 L650,350 L620,350 Z"/>
-  <path id="China" class="country" d="M700,250 L800,250 L800,350 L700,350 Z"/>
-  <path id="Russia" class="country" d="M600,100 L850,100 L850,200 L600,200 Z"/>
-
-</svg>
-
-</section>
+  <!-- DOTS -->
+  <div class="dot india" onclick="showCountry('India')" title="India"></div>
+  <div class="dot pakistan" onclick="showCountry('Pakistan')" title="Pakistan"></div>
+  <div class="dot usa" onclick="showCountry('USA')" title="USA"></div>
+  <div class="dot china" onclick="showCountry('China')" title="China"></div>
+  <div class="dot russia" onclick="showCountry('Russia')" title="Russia"></div>
+</div>
 
 <!-- PANEL -->
-<div id="dashboard" class="panel">
+<div id="panel" class="panel">
 
-  <button class="close-btn" onclick="closePanel()">✖</button>
+<button class="close" onclick="closePanel()">✖</button>
 
-  <h2 id="country-name"></h2>
-  <p id="analysis"></p>
+<h2 id="country"></h2>
+<p id="analysis"></p>
 
-  <!-- RISK METER -->
-  <div class="meter">
-    <div id="meter-fill"></div>
-    <span id="meter-text"></span>
-  </div>
+<div class="meter">
+  <div id="fill"></div>
+  <span id="label"></span>
+</div>
 
-  <h3>Final Risk Score: <span id="score"></span></h3>
+<h3>Risk Score: <span id="score"></span></h3>
 
-  <div id="dimensions"></div>
+<div id="data"></div>
 
 </div>
 
