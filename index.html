@@ -1,49 +1,28 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<title>Geo Risk Intelligence</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&family=Inter:wght@400&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
-<script src="script.js" defer></script>
+  <title>Geo Risk Intelligence</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="script.js" defer></script>
 </head>
 
 <body>
 
-<section class="hero">
-  <h1>Geo Risk Intelligence</h1>
-  <p>Global Geopolitical Risk System</p>
-</section>
+<h1 style="text-align:center;">Geo Risk Intelligence</h1>
 
 <div class="map-container">
-  <img src="world-map.jpg" class="map-img">
 
-  <!-- DOTS -->
-  <div class="dot india" onclick="showCountry('India')" title="India"></div>
-  <div class="dot pakistan" onclick="showCountry('Pakistan')" title="Pakistan"></div>
-  <div class="dot usa" onclick="showCountry('USA')" title="USA"></div>
-  <div class="dot china" onclick="showCountry('China')" title="China"></div>
-  <div class="dot russia" onclick="showCountry('Russia')" title="Russia"></div>
+  <!-- STANDARD WORLD MAP -->
+  <img id="map"
+  src="https://upload.wikimedia.org/wikipedia/commons/8/80/World_map_-_low_resolution.svg">
+
 </div>
 
 <!-- PANEL -->
 <div id="panel" class="panel">
-
-<button class="close" onclick="closePanel()">✖</button>
-
-<h2 id="country"></h2>
-<p id="analysis"></p>
-
-<div class="meter">
-  <div id="fill"></div>
-  <span id="label"></span>
-</div>
-
-<h3>Risk Score: <span id="score"></span></h3>
-
-<div id="data"></div>
-
+  <button onclick="closePanel()">✖</button>
+  <h2 id="country"></h2>
+  <p id="score"></p>
 </div>
 
 </body>
