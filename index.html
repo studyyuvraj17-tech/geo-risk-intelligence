@@ -11,58 +11,42 @@
 
 <section class="hero">
   <h1>Geo Risk Intelligence</h1>
-  <p>Global Geopolitical Risk Dashboard</p>
+  <p>Advanced Geopolitical Risk Analytics</p>
 </section>
 
-<!-- WORLD MAP -->
 <section class="map-section">
 
 <svg viewBox="0 0 1000 500" class="world-map">
 
-  <!-- USA -->
-  <path d="M150,200 L250,200 L250,250 L150,250 Z"
-        class="country" onclick="showCountry('USA')" />
-
-  <!-- INDIA -->
-  <path d="M650,300 L700,300 L700,350 L650,350 Z"
-        class="country" onclick="showCountry('India')" />
-
-  <!-- PAKISTAN -->
-  <path d="M620,300 L650,300 L650,350 L620,350 Z"
-        class="country" onclick="showCountry('Pakistan')" />
-
-  <!-- CHINA -->
-  <path d="M700,250 L800,250 L800,350 L700,350 Z"
-        class="country" onclick="showCountry('China')" />
-
-  <!-- RUSSIA -->
-  <path d="M600,100 L850,100 L850,200 L600,200 Z"
-        class="country" onclick="showCountry('Russia')" />
+  <path id="USA" class="country" d="M150,200 L250,200 L250,250 L150,250 Z"/>
+  <path id="India" class="country" d="M650,300 L700,300 L700,350 L650,350 Z"/>
+  <path id="Pakistan" class="country" d="M620,300 L650,300 L650,350 L620,350 Z"/>
+  <path id="China" class="country" d="M700,250 L800,250 L800,350 L700,350 Z"/>
+  <path id="Russia" class="country" d="M600,100 L850,100 L850,200 L600,200 Z"/>
 
 </svg>
 
 </section>
 
-<!-- SLIDING DASHBOARD -->
+<!-- PANEL -->
 <div id="dashboard" class="panel">
+
+  <button class="close-btn" onclick="closePanel()">✖</button>
 
   <h2 id="country-name"></h2>
   <p id="analysis"></p>
 
-  <div class="score-box">
-    <h3>Risk Score: <span id="score"></span></h3>
-    <p id="risk-level"></p>
+  <!-- RISK METER -->
+  <div class="meter">
+    <div id="meter-fill"></div>
+    <span id="meter-text"></span>
   </div>
 
-  <canvas id="radarChart" width="300" height="300"></canvas>
+  <h3>Final Risk Score: <span id="score"></span></h3>
 
   <div id="dimensions"></div>
 
 </div>
-
-<footer>
-  <p>© 2026 Geo Risk Intelligence</p>
-</footer>
 
 </body>
 </html>
