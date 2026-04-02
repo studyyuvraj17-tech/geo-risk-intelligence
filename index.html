@@ -9,22 +9,35 @@
 
   <style>
     :root {
-      --bg: #05080f;
-      --surface: #0a111f;
-      --surface-light: #162235;
-      --border: #1e3050;
-      --accent: #00d4ff;
+      --bg: #060b15;
+      --surface: #0f172a;
+      --surface-light: #16243d;
+      --surface-soft: #1c2d4a;
+      --border: #283d63;
+      --accent: #38bdf8;
+      --accent-soft: #7dd3fc;
       --low: #22c55e;
       --medium: #f59e0b;
       --high: #ef4444;
-      --text: #f8fafc;
+      --text: #e2e8f0;
       --muted: #94a3b8;
       --mono: 'Share Tech Mono', monospace;
       --sans: 'Exo 2', sans-serif;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: var(--sans); background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+    body {
+      font-family: var(--sans);
+      background:
+        radial-gradient(circle at 15% 15%, rgba(56, 189, 248, 0.12), transparent 30%),
+        radial-gradient(circle at 85% 0%, rgba(15, 23, 42, 0.8), transparent 40%),
+        var(--bg);
+      color: var(--text);
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
 
     /* Grid Overlay */
     body::before {
@@ -36,11 +49,14 @@
     /* --- HEADER --- */
     header {
       z-index: 100; display: flex; align-items: center; justify-content: space-between;
-      padding: 1rem 2rem; background: rgba(5, 8, 15, 0.95); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border);
+      padding: 1rem 2rem;
+      background: rgba(6, 11, 21, 0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
     }
     .logo-group { display: flex; align-items: center; gap: 15px; }
     .logo-square {
-      width: 40px; height: 40px; border: 2px solid var(--accent);
+      width: 42px; height: 42px; border: 2px solid var(--accent);
       display: grid; place-items: center; color: var(--accent);
       font-family: var(--mono); font-weight: bold; border-radius: 4px; box-shadow: 0 0 15px rgba(0, 212, 255, 0.2);
     }
@@ -48,30 +64,68 @@
     .logo-text p { font-size: 0.65rem; color: var(--muted); font-family: var(--mono); }
 
     .header-stats { display: flex; gap: 1rem; }
-    .stat-box { background: var(--surface); border: 1px solid var(--border); padding: 5px 12px; border-radius: 4px; font-family: var(--mono); font-size: 0.75rem; }
+    .stat-box {
+      background: linear-gradient(180deg, rgba(22, 36, 61, 0.85), rgba(15, 23, 42, 0.9));
+      border: 1px solid var(--border);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      box-shadow: 0 8px 18px rgba(2, 6, 23, 0.35);
+    }
     .stat-box span { color: var(--accent); font-weight: bold; }
 
     /* --- TOOLBAR --- */
     .toolbar {
-      padding: 10px 2rem; background: rgba(10, 17, 31, 0.8); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 20px; z-index: 90;
+      padding: 12px 2rem;
+      background: rgba(15, 23, 42, 0.7);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      z-index: 90;
     }
     .search-container { position: relative; width: 300px; }
     #searchInput {
-      width: 100%; background: var(--surface-light); border: 1px solid var(--border);
-      color: white; padding: 8px 12px 8px 35px; border-radius: 4px; font-family: var(--mono); font-size: 0.8rem; outline: none;
+      width: 100%;
+      background: rgba(22, 36, 61, 0.75);
+      border: 1px solid var(--border);
+      color: white;
+      padding: 10px 12px 10px 35px;
+      border-radius: 8px;
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
     }
+    #searchInput:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2); }
     .search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--muted); }
     .filter-pills { display: flex; gap: 8px; }
     .pill {
-      background: transparent; border: 1px solid var(--border); color: var(--muted);
-      padding: 5px 14px; border-radius: 20px; font-size: 0.7rem; cursor: pointer; font-family: var(--mono); transition: 0.2s;
+      background: rgba(22, 36, 61, 0.45);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      cursor: pointer;
+      font-family: var(--mono);
+      transition: 0.2s;
     }
-    .pill.active { background: var(--accent); color: var(--bg); border-color: var(--accent); font-weight: bold; }
+    .pill.active { background: var(--accent); color: #082f49; border-color: var(--accent-soft); font-weight: bold; }
 
     /* --- MAIN LAYOUT --- */
     .app-container { flex: 1; display: flex; position: relative; overflow: hidden; }
     .map-area { flex: 1; position: relative; display: flex; align-items: center; justify-content: center; padding: 2rem; overflow: auto; }
-    .map-container { position: relative; width: 100%; max-width: 1200px; background: #08101d; border-radius: 8px; border: 1px solid var(--border); box-shadow: inset 0 0 50px rgba(0,0,0,0.5); }
+    .map-container {
+      position: relative;
+      width: 100%;
+      max-width: 1200px;
+      background: linear-gradient(180deg, rgba(9, 15, 30, 1), rgba(7, 12, 23, 1));
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      box-shadow: inset 0 0 50px rgba(0,0,0,0.5), 0 20px 40px rgba(2, 6, 23, 0.45);
+    }
     .map-container img { width: 100%; display: block; filter: brightness(0.6) saturate(0.5) hue-rotate(190deg); pointer-events: none; }
 
     /* --- DOTS --- */
@@ -88,17 +142,33 @@
     @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(2.5); opacity: 0; } }
 
     /* --- SIDE PANEL --- */
-    .side-panel { width: 440px; background: var(--surface); border-left: 1px solid var(--border); display: flex; flex-direction: column; z-index: 200; box-shadow: -10px 0 30px rgba(0,0,0,0.5); }
+    .side-panel { width: 440px; background: rgba(15, 23, 42, 0.96); border-left: 1px solid var(--border); display: flex; flex-direction: column; z-index: 200; box-shadow: -10px 0 30px rgba(0,0,0,0.5); }
     .panel-content { flex: 1; overflow-y: auto; padding: 1.8rem; }
     
     /* Global Dashboard UI */
     .section-title { font-family: var(--mono); font-size: 0.75rem; color: var(--muted); border-bottom: 1px solid var(--border); padding-bottom: 6px; margin: 1.8rem 0 12px 0; letter-spacing: 1px; text-transform: uppercase; }
-    .watch-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; background: var(--surface-light); border: 1px solid var(--border); border-radius: 6px; margin-bottom: 8px; cursor: pointer; transition: 0.2s; }
-    .watch-item:hover { border-color: var(--accent); transform: translateX(4px); }
+    .watch-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; background: linear-gradient(180deg, rgba(28,45,74,0.75), rgba(22,36,61,0.65)); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 10px; cursor: pointer; transition: 0.2s; }
+    .watch-item:hover { border-color: var(--accent); transform: translateX(4px); box-shadow: 0 8px 18px rgba(2, 6, 23, 0.4); }
+    .watch-meta { display: flex; flex-direction: column; gap: 2px; }
+    .watch-code { font-family: var(--mono); color: var(--muted); font-size: 0.65rem; letter-spacing: 0.8px; }
+    .watch-score { font-family: var(--mono); font-weight: 700; font-size: 0.9rem; }
     .alert-item { border-left: 3px solid var(--high); padding: 12px 15px; background: linear-gradient(90deg, rgba(239,68,68,0.08), transparent); margin-bottom: 10px; border-radius: 0 6px 6px 0; border: 1px solid var(--surface-light); }
     .alert-time { font-family: var(--mono); font-size: 0.65rem; color: var(--muted); margin-bottom: 6px; }
     
     .back-btn { background: transparent; border: none; color: var(--accent); font-family: var(--mono); font-size: 0.75rem; cursor: pointer; margin-bottom: 20px; display: inline-flex; align-items: center; gap: 8px; }
+    .risk-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 5px 12px;
+      border-radius: 999px;
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.7px;
+      font-weight: 700;
+      border: 1px solid currentColor;
+      background: rgba(15, 23, 42, 0.6);
+      margin-left: auto;
+    }
 
     /* Data Visuals */
     .score-card { background: var(--surface-light); padding: 1.2rem; border-radius: 8px; margin-bottom: 1.5rem; border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
@@ -141,6 +211,10 @@
     <button class="pill" data-filter="medium">MID RISK</button>
     <button class="pill" data-filter="low">STABLE</button>
   </div>
+</div>
+
+<div style="padding:8px 2rem; border-bottom:1px solid var(--border); background:rgba(15,23,42,0.45); font-family:var(--mono); font-size:0.68rem; color:var(--muted); letter-spacing:0.6px;">
+  EXECUTIVE MONITORING DASHBOARD · OPERATIONAL SNAPSHOT
 </div>
 
 <div class="app-container">
@@ -264,7 +338,8 @@ function renderGlobalOverview() {
     .sort((a,b) => b.score - a.score).slice(0, 5);
 
   document.getElementById('panelContent').innerHTML = `
-    <h2 style="font-size:1.3rem; margin-bottom:1.5rem">GLOBAL COMMAND</h2>
+    <h2 style="font-size:1.3rem; margin-bottom:0.4rem">GLOBAL COMMAND</h2>
+    <p style="font-family:var(--mono); font-size:0.68rem; color:var(--muted); margin-bottom:1.4rem;">Last refreshed: ${new Date().toUTCString()}</p>
     <div class="score-card">
       <div>
         <p style="font-size:0.65rem; color:var(--muted); font-family:var(--mono)">GLOBAL AVERAGE RISK</p>
@@ -274,8 +349,11 @@ function renderGlobalOverview() {
     <div class="section-title">TOP RISK WATCHLIST</div>
     ${topCountries.map(c => `
       <div class="watch-item" onclick="selectCountry('${c.code}')">
-        <span>${c.name}</span>
-        <span style="color:${getRiskLevel(c.score).color}">${c.score}</span>
+        <div class="watch-meta">
+          <span>${c.name}</span>
+          <span class="watch-code">${c.code} · ${getRiskLevel(c.score).label}</span>
+        </div>
+        <span class="watch-score" style="color:${getRiskLevel(c.score).color}">${c.score}</span>
       </div>
     `).join('')}
     <div class="section-title">ACTIVE ALERTS</div>
@@ -299,6 +377,7 @@ function selectCountry(code) {
     <div style="display:flex; align-items:center; gap:12px; margin-bottom:1rem">
       <img src="https://flagcdn.com/w80/${code.toLowerCase()}.png" style="width:35px; border-radius:2px">
       <h2 style="font-size:1.6rem">${country.name}</h2>
+      <span class="risk-badge" style="color:${risk.color}">${risk.label} RISK</span>
     </div>
     <div class="score-card">
       <div>
