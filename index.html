@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Geo Risk Intelligence | Global Command</title>
+  <title>Geo Risk Intelligence | Global Terminal</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Exo+2:wght@300;400;600;700&display=swap" rel="stylesheet"/>
 
@@ -17,7 +17,6 @@
       --low: #22c55e;
       --medium: #f59e0b;
       --high: #ef4444;
-      --critical: #ff1f1f;
       --text: #f8fafc;
       --muted: #94a3b8;
       --mono: 'Share Tech Mono', monospace;
@@ -40,58 +39,47 @@
       padding: 0.8rem 2rem; background: rgba(2, 4, 8, 0.95); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border);
     }
     .logo-group { display: flex; align-items: center; gap: 12px; }
-    .logo-box {
-      width: 35px; height: 35px; border: 2px solid var(--accent);
-      display: grid; place-items: center; color: var(--accent);
-      font-family: var(--mono); font-weight: bold; border-radius: 4px; box-shadow: 0 0 15px rgba(0, 212, 255, 0.2);
-    }
+    .logo-box { width: 35px; height: 35px; border: 2px solid var(--accent); display: grid; place-items: center; color: var(--accent); font-family: var(--mono); font-weight: bold; border-radius: 4px; box-shadow: 0 0 15px rgba(0, 212, 255, 0.2); }
     .logo-text h1 { font-size: 1rem; text-transform: uppercase; letter-spacing: 2px; }
-    
+
     .header-stats { display: flex; gap: 1.5rem; }
     .stat-item { text-align: center; font-family: var(--mono); border-left: 1px solid var(--border); padding-left: 1.5rem; }
     .stat-label { font-size: 0.6rem; color: var(--muted); text-transform: uppercase; }
     .stat-value { font-size: 0.9rem; font-weight: bold; color: var(--accent); }
 
     /* --- TOOLBAR --- */
-    .toolbar {
-      padding: 10px 2rem; background: rgba(10, 17, 31, 0.8); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 20px; z-index: 90;
-    }
+    .toolbar { padding: 10px 2rem; background: rgba(10, 17, 31, 0.8); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 20px; z-index: 90; }
     .search-container { position: relative; width: 300px; }
-    #searchInput {
-      width: 100%; background: var(--surface-light); border: 1px solid var(--border);
-      color: white; padding: 8px 12px 8px 35px; border-radius: 4px; font-family: var(--mono); font-size: 0.8rem; outline: none; transition: 0.2s;
-    }
-    #searchInput:focus { border-color: var(--accent); }
+    #searchInput { width: 100%; background: var(--surface-light); border: 1px solid var(--border); color: white; padding: 8px 12px 8px 35px; border-radius: 4px; font-family: var(--mono); font-size: 0.8rem; outline: none; transition: 0.2s; }
     .search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--muted); }
-    
     .filter-pills { display: flex; gap: 8px; }
-    .pill {
-      background: transparent; border: 1px solid var(--border); color: var(--muted);
-      padding: 5px 14px; border-radius: 20px; font-size: 0.7rem; cursor: pointer; font-family: var(--mono); transition: 0.2s;
-    }
+    .pill { background: transparent; border: 1px solid var(--border); color: var(--muted); padding: 5px 14px; border-radius: 20px; font-size: 0.7rem; cursor: pointer; font-family: var(--mono); transition: 0.2s; }
     .pill.active { background: var(--accent); color: var(--bg); border-color: var(--accent); font-weight: bold; }
 
     /* --- MAIN LAYOUT --- */
     .app-container { flex: 1; display: flex; position: relative; overflow: hidden; }
-    .map-area { flex: 1; position: relative; display: flex; align-items: center; justify-content: center; padding: 1rem; }
-    .map-container { position: relative; width: 100%; max-width: 1100px; }
-    .map-container img { width: 100%; display: block; filter: brightness(0.4) saturate(0.6) hue-rotate(195deg); pointer-events: none; opacity: 0.8; }
+    .map-area { flex: 1; position: relative; display: flex; align-items: center; justify-content: center; padding: 1rem; background: #050a14; }
+    .map-container { position: relative; width: 100%; height: 100%; max-width: 1100px; display: flex; align-items: center; justify-content: center; }
+    
+    /* Optimized Map Styling */
+    .map-container img { 
+        width: 100%; height: auto; display: block; 
+        filter: brightness(0.5) saturate(0.6) hue-rotate(195deg); 
+        pointer-events: none; opacity: 0.8; 
+    }
 
     /* --- DOTS --- */
     .dot {
       position: absolute; width: 11px; height: 11px; border-radius: 50%; transform: translate(-50%, -50%); cursor: pointer;
       border: 1px solid rgba(255,255,255,0.3); transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
-    .dot:hover { transform: translate(-50%, -50%) scale(2); z-index: 10; }
+    .dot:hover { transform: translate(-50%, -50%) scale(2.2); z-index: 10; box-shadow: 0 0 15px currentColor; }
     .dot.selected { transform: translate(-50%, -50%) scale(2.5); border: 2px solid #fff; z-index: 11; box-shadow: 0 0 20px currentColor; }
     
     .dot-low { background: var(--low); color: var(--low); }
     .dot-medium { background: var(--medium); color: var(--medium); }
     .dot-high { background: var(--high); color: var(--high); }
-    
-    .dot-critical::after {
-      content: ''; position: absolute; inset: -5px; border-radius: 50%; border: 1px solid var(--high); animation: pulse 1.5s infinite;
-    }
+    .dot-critical::after { content: ''; position: absolute; inset: -5px; border-radius: 50%; border: 1px solid var(--high); animation: pulse 1.5s infinite; }
     @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(3); opacity: 0; } }
 
     /* --- SIDE PANEL --- */
@@ -100,25 +88,22 @@
     .panel-content::-webkit-scrollbar { width: 4px; }
     .panel-content::-webkit-scrollbar-thumb { background: var(--border); }
 
-    /* Dashboard Modules */
     .section-title { font-family: var(--mono); font-size: 0.7rem; color: var(--accent); border-bottom: 1px solid var(--border); padding-bottom: 6px; margin: 1.5rem 0 12px 0; letter-spacing: 1px; text-transform: uppercase; }
-    
-    .leaderboard-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer; transition: 0.2s; }
-    .leaderboard-item:hover { color: var(--accent); padding-left: 5px; }
-    .risk-score-badge { font-family: var(--mono); font-weight: bold; font-size: 0.8rem; }
+    .leaderboard-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer; }
+    .leaderboard-item:hover { color: var(--accent); }
 
-    .news-card { border-left: 2px solid var(--high); padding: 10px 12px; background: rgba(255,255,255,0.02); margin-bottom: 8px; border-radius: 0 4px 4px 0; }
-    .news-time { font-family: var(--mono); font-size: 0.6rem; color: var(--muted); margin-bottom: 4px; }
-    .news-text { font-size: 0.8rem; line-height: 1.4; color: #cbd5e1; }
+    /* News Module */
+    .news-card { border-left: 3px solid var(--high); padding: 10px 12px; background: rgba(255,255,255,0.02); margin-bottom: 12px; border-radius: 0 4px 4px 0; border: 1px solid var(--border); border-left-width: 3px; }
+    .news-time { font-family: var(--mono); font-size: 0.6rem; color: var(--muted); margin-bottom: 6px; display: flex; justify-content: space-between; }
+    .news-text { font-size: 0.85rem; line-height: 1.4; color: #cbd5e1; margin-bottom: 8px; }
+    .news-link { color: var(--accent); font-family: var(--mono); font-size: 0.65rem; text-decoration: none; font-weight: bold; }
+    .news-link:hover { text-decoration: underline; }
 
     .score-hero { background: var(--surface-light); padding: 1.5rem; border-radius: 8px; border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
     .hero-val { font-family: var(--mono); font-size: 2.5rem; font-weight: bold; color: var(--accent); line-height: 1; }
     .hero-label { font-size: 0.65rem; color: var(--muted); font-family: var(--mono); text-transform: uppercase; }
-
     .chart-box { height: 250px; margin-bottom: 1.5rem; }
-    
     .back-btn { background: transparent; border: none; color: var(--accent); font-family: var(--mono); font-size: 0.7rem; cursor: pointer; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 8px; }
-    .back-btn:hover { text-decoration: underline; }
 
     #mapTooltip { position: absolute; background: var(--surface-light); border: 1px solid var(--accent); padding: 6px 12px; border-radius: 4px; pointer-events: none; font-family: var(--mono); font-size: 0.75rem; z-index: 1000; display: none; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
   </style>
@@ -135,14 +120,14 @@
   <div class="header-stats">
     <div class="stat-item"><div class="stat-label">Coverage</div><div class="stat-value">195 Countries</div></div>
     <div class="stat-item"><div class="stat-label">Data Sources</div><div class="stat-value">340+ Active</div></div>
-    <div class="stat-item"><div class="stat-label">Last Update</div><div class="stat-value">06:14 UTC</div></div>
+    <div class="stat-item"><div class="stat-label">System</div><div class="stat-value" style="color:var(--low)">ONLINE</div></div>
   </div>
 </header>
 
 <div class="toolbar">
   <div class="search-container">
     <span class="search-icon">🔍</span>
-    <input type="text" id="searchInput" placeholder="Search system database...">
+    <input type="text" id="searchInput" placeholder="Search system terminal...">
   </div>
   <div class="filter-pills">
     <button class="pill active" data-filter="all">GLOBAL</button>
@@ -155,7 +140,7 @@
 <div class="app-container">
   <main class="map-area">
     <div class="map-container" id="mapContainer">
-      <img src="https://upload.wikimedia.org/wikipedia/commons/8/80/World_map_-_low_resolution.svg" id="worldMap">
+      <img src="https://simplemaps.com/static/svg/world.svg" id="worldMap">
     </div>
     <div id="mapTooltip"></div>
   </main>
@@ -184,13 +169,15 @@ const DATA = {
   "ZA": { name: "South Africa", lat: -30.5, lon: 22.9, vals: [60, 35, 15, 80, 20, 55], trend: "up" },
   "IR": { name: "Iran", lat: 32.4, lon: 53.6, vals: [75, 65, 95, 70, 55, 80], trend: "up" },
   "KP": { name: "North Korea", lat: 40.3, lon: 127.5, vals: [85, 75, 99, 30, 20, 95], trend: "stable" },
-  "IL": { name: "Israel", lat: 31.0, lon: 34.8, vals: [70, 95, 20, 65, 90, 45], trend: "up" }
+  "IL": { name: "Israel", lat: 31.0, lon: 34.8, vals: [70, 95, 20, 65, 90, 45], trend: "up" },
+  "FR": { name: "France", lat: 46.2, lon: 2.2, vals: [35, 10, 5, 55, 30, 15], trend: "up" },
+  "MM": { name: "Myanmar", lat: 21.9, lon: 95.9, vals: [90, 95, 80, 85, 75, 85], trend: "up" }
 };
 
 const NEWS = [
-  { time: "06:14 UTC", text: "Escalation in maritime corridor — Strait of Hormuz.", type: "high" },
-  { time: "04:52 UTC", text: "New sanctions package targeting energy sector exports.", type: "high" },
-  { time: "03:30 UTC", text: "Protest movement expands to 4 additional regions.", type: "med" }
+  { time: "06:14 UTC", text: "Escalation in maritime corridor — Strait of Hormuz.", source: "Reuters", link: "https://reuters.com", type: "high" },
+  { time: "04:52 UTC", text: "New sanctions package targeting energy sector exports.", source: "Bloomberg", link: "https://bloomberg.com", type: "high" },
+  { time: "03:30 UTC", text: "Protest movement expands to 4 additional regions.", source: "Al Jazeera", link: "https://aljazeera.com", type: "med" }
 ];
 
 // --- CORE LOGIC ---
@@ -277,11 +264,15 @@ function renderGlobalOverview() {
       </div>
     `).join('')}
 
-    <div class="section-title">Active Threat Intelligence</div>
+    <div class="section-title">Live Intelligence Feed</div>
     ${NEWS.map(n => `
       <div class="news-card" style="border-left-color: ${n.type === 'high' ? 'var(--high)' : 'var(--medium)'}">
-        <div class="news-time">${n.time}</div>
+        <div class="news-time">
+            <span>${n.time}</span>
+            <span style="color:var(--accent)">Source: ${n.source}</span>
+        </div>
         <div class="news-text">${n.text}</div>
+        <a href="${n.link}" target="_blank" class="news-link">READ FULL SOURCE ↗</a>
       </div>
     `).join('')}
   `;
