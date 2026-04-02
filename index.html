@@ -3,8 +3,6 @@
 <head>
   <title>Geo Risk Intelligence</title>
 
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
-
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <link rel="stylesheet" href="style.css">
@@ -12,12 +10,7 @@
 
 <body>
 
-<div class="header">
-  <h1>Geo Risk Intelligence</h1>
-  <p>Live Geopolitical Intelligence Platform</p>
-</div>
-
-<p class="instruction">Click a country to view intelligence</p>
+<h1 style="text-align:center;">Geo Risk Intelligence</h1>
 
 <div class="map-container">
   <img id="map"
@@ -25,12 +18,16 @@
 </div>
 
 <div id="panel" class="panel">
-  <button class="close-btn" onclick="closePanel()">✖</button>
+  <button onclick="closePanel()">✖</button>
 
   <h2 id="country"></h2>
   <h3 id="risk"></h3>
 
   <canvas id="chart"></canvas>
+
+  <!-- 🔥 IMPORTANT -->
+  <div id="details"></div>
+
 </div>
 
 <script src="script.js"></script>
