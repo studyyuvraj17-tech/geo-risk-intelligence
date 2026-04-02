@@ -1,76 +1,61 @@
 const data = {
   India: {
     score: 42,
-    analysis: "India shows moderate geopolitical risk with stable governance but social and economic pressures.",
+    analysis: "India shows moderate geopolitical risk.",
     dimensions: {
-      "Government Stability": 38,
-      "Political Legitimacy": 40,
-      "Conflict & Security": 45,
-      "Economic Stability": 50,
-      "Social Cohesion": 55,
-      "External Relations": 30,
-      "Governance": 45,
-      "Strategic Importance": 60
+      Stability: 38,
+      Conflict: 45,
+      Economic: 50,
+      Social: 55,
+      External: 30
     }
   },
 
   Pakistan: {
     score: 65,
-    analysis: "Pakistan faces high instability due to political tensions and economic stress.",
+    analysis: "Pakistan faces instability.",
     dimensions: {
-      "Government Stability": 65,
-      "Political Legitimacy": 60,
-      "Conflict & Security": 70,
-      "Economic Stability": 75,
-      "Social Cohesion": 65,
-      "External Relations": 60,
-      "Governance": 70,
-      "Strategic Importance": 55
+      Stability: 65,
+      Conflict: 70,
+      Economic: 75,
+      Social: 65,
+      External: 60
     }
   },
 
   USA: {
     score: 48,
-    analysis: "USA remains stable but faces polarization and global tensions.",
+    analysis: "USA faces global tensions.",
     dimensions: {
-      "Government Stability": 45,
-      "Political Legitimacy": 50,
-      "Conflict & Security": 60,
-      "Economic Stability": 55,
-      "Social Cohesion": 65,
-      "External Relations": 30,
-      "Governance": 40,
-      "Strategic Importance": 90
+      Stability: 45,
+      Conflict: 60,
+      Economic: 55,
+      Social: 65,
+      External: 30
     }
   },
 
   China: {
     score: 55,
-    analysis: "China shows strong control but rising global tensions.",
+    analysis: "China shows strong governance.",
     dimensions: {
-      "Government Stability": 30,
-      "Political Legitimacy": 55,
-      "Conflict & Security": 65,
-      "Economic Stability": 60,
-      "Social Cohesion": 50,
-      "External Relations": 70,
-      "Governance": 50,
-      "Strategic Importance": 85
+      Stability: 30,
+      Conflict: 65,
+      Economic: 60,
+      Social: 50,
+      External: 70
     }
   },
 
   Russia: {
     score: 70,
-    analysis: "Russia faces high geopolitical risk due to conflicts and sanctions.",
+    analysis: "Russia faces high risk.",
     dimensions: {
-      "Government Stability": 40,
-      "Political Legitimacy": 60,
-      "Conflict & Security": 90,
-      "Economic Stability": 65,
-      "Social Cohesion": 50,
-      "External Relations": 85,
-      "Governance": 60,
-      "Strategic Importance": 80
+      Stability: 40,
+      Conflict: 90,
+      Economic: 65,
+      Social: 50,
+      External: 85
     }
   }
 };
@@ -83,22 +68,19 @@ function showCountry(country) {
   document.getElementById("analysis").innerText = c.analysis;
   document.getElementById("score").innerText = c.score;
 
-  let level = "";
-  if (c.score < 34) level = "Low Risk";
-  else if (c.score < 67) level = "Medium Risk";
-  else level = "High Risk";
+  document.getElementById("risk-level").innerText =
+    c.score < 34 ? "Low Risk" :
+    c.score < 67 ? "Medium Risk" :
+    "High Risk";
 
-  document.getElementById("risk-level").innerText = level;
+  drawRadarChart(c.dimensions);
 
   const dimDiv = document.getElementById("dimensions");
   dimDiv.innerHTML = "";
 
   for (let key in c.dimensions) {
     let value = c.dimensions[key];
-
-    let colorClass = "low";
-    if (value >= 34 && value < 67) colorClass = "medium";
-    if (value >= 67) colorClass = "high";
+    let color = value < 34 ? "low" : value < 67 ? "medium" : "high";
 
     let div = document.createElement("div");
     div.className = "dimension";
@@ -106,10 +88,42 @@ function showCountry(country) {
     div.innerHTML = `
       <strong>${key}: ${value}</strong>
       <div class="bar">
-        <div class="fill ${colorClass}" style="width:${value}%"></div>
+        <div class="fill ${color}" style="width:${value}%"></div>
       </div>
     `;
 
     dimDiv.appendChild(div);
   }
+}
+
+function drawRadarChart(dataObj) {
+  const canvas = document.getElementById("radarChart");
+  const ctx = canvas.getContext("2d");
+
+  ctx.clearRect(0, 0, 300, 300);
+
+  const values = Object.values(dataObj);
+  const labels = Object.keys(dataObj);
+  const centerX = 150;
+  const centerY = 150;
+  const radius = 100;
+
+  const angleStep = (2 * Math.PI) / values.length;
+
+  ctx.beginPath();
+
+  values.forEach((value, i) => {
+    const angle = i * angleStep;
+    const r = (value / 100) * radius;
+
+    const x = centerX + r * Math.cos(angle);
+    const y = centerY + r * Math.sin(angle);
+
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  });
+
+  ctx.closePath();
+  ctx.strokeStyle = "#00f0ff";
+  ctx.stroke();
 }
