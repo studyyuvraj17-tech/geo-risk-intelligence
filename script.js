@@ -1,126 +1,82 @@
+document.querySelectorAll(".country").forEach(el => {
+  el.addEventListener("click", () => showCountry(el.id));
+});
+
 const data = {
   India: {
-    score: 42,
-    analysis: "India shows moderate geopolitical risk.",
-    dimensions: {
-      Stability: 38,
-      Conflict: 45,
-      Economic: 50,
-      Social: 55,
-      External: 30
-    }
+    analysis: "Moderate political and social pressures.",
+    values: [38,45,20,50,35,40]
   },
   Pakistan: {
-    score: 65,
-    analysis: "Pakistan faces instability.",
-    dimensions: {
-      Stability: 65,
-      Conflict: 70,
-      Economic: 75,
-      Social: 65,
-      External: 60
-    }
+    analysis: "High instability and economic stress.",
+    values: [65,70,60,65,60,70]
   },
   USA: {
-    score: 48,
-    analysis: "USA faces global tensions.",
-    dimensions: {
-      Stability: 45,
-      Conflict: 60,
-      Economic: 55,
-      Social: 65,
-      External: 30
-    }
+    analysis: "Stable but facing polarization.",
+    values: [45,60,25,65,30,40]
   },
   China: {
-    score: 55,
-    analysis: "China shows strong governance.",
-    dimensions: {
-      Stability: 30,
-      Conflict: 65,
-      Economic: 60,
-      Social: 50,
-      External: 70
-    }
+    analysis: "Strong control with global tensions.",
+    values: [30,65,50,50,40,50]
   },
   Russia: {
-    score: 70,
-    analysis: "Russia faces high risk.",
-    dimensions: {
-      Stability: 40,
-      Conflict: 90,
-      Economic: 65,
-      Social: 50,
-      External: 85
-    }
+    analysis: "High conflict and sanctions risk.",
+    values: [40,90,95,50,40,60]
   }
 };
 
+const labels = [
+  "Political Instability",
+  "Armed Conflict",
+  "Economic Sanctions",
+  "Civil Unrest",
+  "Terrorism & Extremism",
+  "Legal Risk"
+];
+
 function showCountry(country) {
   const c = data[country];
-
   const panel = document.getElementById("dashboard");
+
   panel.classList.add("active");
 
   document.getElementById("country-name").innerText = country;
   document.getElementById("analysis").innerText = c.analysis;
-  document.getElementById("score").innerText = c.score;
 
-  document.getElementById("risk-level").innerText =
-    c.score < 34 ? "Low Risk" :
-    c.score < 67 ? "Medium Risk" :
-    "High Risk";
+  const avg = Math.round(c.values.reduce((a,b)=>a+b)/6);
 
-  drawRadarChart(c.dimensions);
+  document.getElementById("score").innerText = avg;
+
+  updateMeter(avg);
 
   const dimDiv = document.getElementById("dimensions");
   dimDiv.innerHTML = "";
 
-  for (let key in c.dimensions) {
-    let value = c.dimensions[key];
-    let color = value < 34 ? "low" : value < 67 ? "medium" : "high";
+  c.values.forEach((v,i) => {
+    let color = v<34?"low":v<67?"medium":"high";
 
-    let div = document.createElement("div");
-    div.className = "dimension";
-
-    div.innerHTML = `
-      <strong>${key}: ${value}</strong>
-      <div class="bar">
-        <div class="fill ${color}" style="width:${value}%"></div>
+    dimDiv.innerHTML += `
+      <div class="dimension">
+        <strong>${labels[i]}: ${v}</strong>
+        <div class="bar">
+          <div class="fill ${color}" style="width:${v}%"></div>
+        </div>
       </div>
     `;
-
-    dimDiv.appendChild(div);
-  }
+  });
 }
 
-function drawRadarChart(dataObj) {
-  const canvas = document.getElementById("radarChart");
-  const ctx = canvas.getContext("2d");
+function updateMeter(score){
+  const fill = document.getElementById("meter-fill");
+  const text = document.getElementById("meter-text");
 
-  ctx.clearRect(0, 0, 300, 300);
+  fill.style.width = score+"%";
 
-  const values = Object.values(dataObj);
-  const centerX = 150;
-  const centerY = 150;
-  const radius = 100;
+  if(score<34){ fill.style.background="green"; text.innerText="Low"; }
+  else if(score<67){ fill.style.background="orange"; text.innerText="Medium"; }
+  else { fill.style.background="red"; text.innerText="High"; }
+}
 
-  const angleStep = (2 * Math.PI) / values.length;
-
-  ctx.beginPath();
-
-  values.forEach((value, i) => {
-    const angle = i * angleStep;
-    const r = (value / 100) * radius;
-
-    const x = centerX + r * Math.cos(angle);
-    const y = centerY + r * Math.sin(angle);
-
-    if (i === 0) ctx.moveTo(x, y);
-    else ctx.lineTo(x, y);
-  });
-
-  ctx.closePath();
-  ctx.strokeStyle = "#00f0ff";
-  ctx.stroke();
+function closePanel(){
+  document.getElementById("dashboard").classList.remove("active");
 }
