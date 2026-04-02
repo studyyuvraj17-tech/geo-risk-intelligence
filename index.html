@@ -3,292 +3,224 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Geo Risk | Intelligence Terminal</title>
+  <title>Sentinel | Geo-Intelligence Terminal</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Exo+2:wght@300;400;600;700&display=swap" rel="stylesheet"/>
 
   <style>
     :root {
-      --bg: #03070c;
-      --surface: #0a111f;
-      --surface-light: #162235;
-      --border: #1e3050;
-      --accent: #00d4ff;
-      --low: #22c55e;
-      --medium: #f59e0b;
-      --high: #ef4444;
-      --text: #f8fafc;
-      --muted: #94a3b8;
-      --mono: 'Share Tech Mono', monospace;
-      --sans: 'Exo 2', sans-serif;
+      --bg: #020408; --surface: #0a111f; --surface-light: #162235;
+      --border: #1e3050; --accent: #00d4ff; --low: #22c55e;
+      --medium: #f59e0b; --high: #ef4444; --text: #f8fafc;
+      --muted: #64748b; --mono: 'Share Tech Mono', monospace;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: var(--sans); background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+    * { box-sizing: border-box; margin: 0; padding: 0; cursor: crosshair; }
+    body { font-family: 'Exo 2', sans-serif; background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
 
-    /* --- BACKGROUND --- */
-    body::before {
-      content: ''; position: fixed; inset: 0;
-      background-image: linear-gradient(rgba(0,212,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(0,212,255,0.02) 1px, transparent 1px);
-      background-size: 40px 40px; pointer-events: none; z-index: 0;
-    }
+    /* --- UI COMPONENTS --- */
+    header { z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 0.8rem 1.5rem; background: rgba(2,4,8,0.9); border-bottom: 1px solid var(--border); backdrop-filter: blur(10px); }
+    .logo { display: flex; align-items: center; gap: 10px; font-family: var(--mono); color: var(--accent); letter-spacing: 2px; }
+    .ticker-header { display: flex; gap: 20px; font-family: var(--mono); font-size: 0.7rem; }
+    .val-up { color: var(--low); } .val-down { color: var(--high); }
 
-    /* --- HEADER --- */
-    header {
-      z-index: 100; display: flex; align-items: center; justify-content: space-between;
-      padding: 0.8rem 1.5rem; background: rgba(3, 7, 12, 0.95); backdrop-filter: blur(10px);
-      border-bottom: 1px solid var(--border);
-    }
-    .logo-group { display: flex; align-items: center; gap: 12px; }
-    .logo-box { width: 32px; height: 32px; border: 2px solid var(--accent); display: grid; place-items: center; color: var(--accent); font-family: var(--mono); font-weight: bold; border-radius: 4px; box-shadow: 0 0 10px rgba(0,212,255,0.3); }
-    .logo-text h1 { font-size: 1rem; text-transform: uppercase; letter-spacing: 2px; }
-    
-    .market-status { display: flex; gap: 15px; font-family: var(--mono); font-size: 0.7rem; }
-    .market-item { padding: 4px 10px; border-radius: 3px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); }
-    .market-up { color: var(--low); }
-    .market-down { color: var(--high); }
+    .main-grid { flex: 1; display: flex; position: relative; overflow: hidden; }
 
-    /* --- MAIN LAYOUT --- */
-    .app-container { flex: 1; display: flex; position: relative; overflow: hidden; }
+    /* --- MAP --- */
+    .map-container { flex: 1; position: relative; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at center, #0a1628 0%, #020408 100%); }
+    .map-container img { width: 90%; filter: brightness(0.4) saturate(0.5) hue-rotate(190deg); opacity: 0.6; pointer-events: none; }
 
-    .map-area { flex: 1; position: relative; display: flex; align-items: center; justify-content: center; background: #050a14; }
-    .map-container { position: relative; width: 92%; max-width: 1100px; }
-    .map-container img { width: 100%; display: block; filter: brightness(0.5) saturate(0.6) hue-rotate(195deg); pointer-events: none; opacity: 0.8; }
-
-    /* --- DOTS & INTERACTION --- */
-    .dot {
-      position: absolute; width: 10px; height: 10px; border-radius: 50%;
-      transform: translate(-50%, -50%); cursor: pointer;
-      border: 1px solid rgba(255,255,255,0.4); transition: 0.3s;
-    }
-    .dot:hover { transform: translate(-50%, -50%) scale(2); z-index: 50; box-shadow: 0 0 15px currentColor; }
-    .dot.selected { transform: translate(-50%, -50%) scale(2.5); border: 2px solid #fff; z-index: 51; box-shadow: 0 0 25px currentColor; }
+    .dot { position: absolute; width: 10px; height: 10px; border-radius: 50%; transform: translate(-50%, -50%); transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+    .dot:hover { transform: translate(-50%, -50%) scale(2.5); z-index: 100; box-shadow: 0 0 20px currentColor; }
+    .dot.selected { transform: translate(-50%, -50%) scale(3); border: 2px solid white; z-index: 101; }
+    .dot-high { background: var(--high); color: var(--high); box-shadow: 0 0 10px var(--high); }
+    .dot-med { background: var(--medium); color: var(--medium); }
     .dot-low { background: var(--low); color: var(--low); }
-    .dot-medium { background: var(--medium); color: var(--medium); }
-    .dot-high { background: var(--high); color: var(--high); }
     
-    .dot-critical::after {
-      content: ''; position: absolute; inset: -6px; border-radius: 50%; border: 1px solid var(--high); animation: pulse 1.5s infinite;
-    }
-    @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(3); opacity: 0; } }
+    .pulse::after { content: ''; position: absolute; inset: -5px; border-radius: 50%; border: 1px solid currentColor; animation: p 1.5s infinite; }
+    @keyframes p { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(3); opacity: 0; } }
 
-    /* --- SIDE PANEL --- */
-    .side-panel { width: 420px; background: var(--surface); border-left: 1px solid var(--border); display: flex; flex-direction: column; z-index: 200; box-shadow: -10px 0 30px rgba(0,0,0,0.5); }
-    .panel-header { padding: 1.5rem; border-bottom: 1px solid var(--border); background: rgba(255,255,255,0.02); }
-    .panel-body { flex: 1; overflow-y: auto; padding: 1.5rem; }
-    .panel-body::-webkit-scrollbar { width: 4px; }
-    .panel-body::-webkit-scrollbar-thumb { background: var(--border); }
+    /* --- SIDEBAR --- */
+    .sidebar { width: 440px; background: var(--surface); border-left: 1px solid var(--border); display: flex; flex-direction: column; box-shadow: -10px 0 30px rgba(0,0,0,0.5); z-index: 200; }
+    .side-scroll { flex: 1; overflow-y: auto; padding: 1.5rem; }
+    .side-scroll::-webkit-scrollbar { width: 4px; }
+    .side-scroll::-webkit-scrollbar-thumb { background: var(--border); }
 
-    /* --- NEWS CARDS --- */
-    .news-card {
-      background: var(--surface-light); border: 1px solid var(--border); border-radius: 6px;
-      padding: 12px; margin-bottom: 12px; transition: 0.2s; position: relative;
-    }
-    .news-card:hover { border-color: var(--accent); background: #1c2b42; }
-    .news-meta { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 0.6rem; color: var(--muted); margin-bottom: 6px; }
-    .news-title { font-size: 0.85rem; font-weight: 600; line-height: 1.3; margin-bottom: 8px; color: #fff; }
-    .source-link { color: var(--accent); font-family: var(--mono); font-size: 0.65rem; text-decoration: none; display: flex; align-items: center; gap: 4px; }
-    .source-link:hover { text-decoration: underline; }
-    
-    .severity-tag { font-size: 0.6rem; padding: 1px 5px; border-radius: 3px; font-weight: bold; }
-    .sev-high { background: rgba(239, 68, 68, 0.2); color: var(--high); }
+    .card { background: var(--surface-light); border: 1px solid var(--border); padding: 1rem; border-radius: 6px; margin-bottom: 1rem; transition: 0.2s; }
+    .card:hover { border-color: var(--accent); }
+    .card-meta { font-family: var(--mono); font-size: 0.6rem; color: var(--muted); margin-bottom: 5px; display: flex; justify-content: space-between; }
+    .card-title { font-size: 0.9rem; font-weight: 600; line-height: 1.3; margin-bottom: 10px; color: #fff; }
+    .card-link { font-family: var(--mono); font-size: 0.65rem; color: var(--accent); text-decoration: none; }
 
-    /* --- ANALYST UI --- */
     .section-label { font-family: var(--mono); font-size: 0.7rem; color: var(--accent); letter-spacing: 1px; text-transform: uppercase; margin: 1.5rem 0 0.8rem; border-bottom: 1px solid var(--border); padding-bottom: 4px; }
-    .risk-bar-container { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-    .risk-bar-label { width: 80px; font-size: 0.7rem; font-family: var(--mono); color: var(--muted); }
-    .risk-bar-track { flex: 1; height: 4px; background: #0f172a; border-radius: 2px; }
-    .risk-bar-fill { height: 100%; border-radius: 2px; transition: 0.6s ease-out; }
     
-    /* --- TICKER --- */
-    .ticker-wrap { height: 35px; background: var(--surface); border-top: 1px solid var(--border); display: flex; align-items: center; overflow: hidden; z-index: 100; font-family: var(--mono); font-size: 0.7rem; }
-    .ticker-label { background: var(--high); color: #fff; padding: 0 15px; height: 100%; display: flex; align-items: center; font-weight: bold; z-index: 2; position: relative; }
-    .ticker-content { white-space: nowrap; animation: ticker 40s linear infinite; padding-left: 20px; color: var(--muted); }
-    @keyframes ticker { 0% { transform: translateX(0); } 100% { transform: translateX(-100%); } }
+    /* --- INTERACTIVE SLIDERS --- */
+    .slider-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+    .slider-label { width: 90px; font-size: 0.7rem; font-family: var(--mono); color: var(--muted); }
+    input[type=range] { flex: 1; height: 4px; background: #0f172a; accent-color: var(--accent); }
 
-    /* Tooltip */
-    #mapTooltip { position: absolute; background: var(--surface-light); border: 1px solid var(--accent); padding: 5px 12px; border-radius: 4px; pointer-events: none; font-family: var(--mono); font-size: 0.75rem; z-index: 1000; display: none; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+    /* --- FOOTER TICKER --- */
+    .ticker { height: 30px; background: #050a14; border-top: 1px solid var(--border); display: flex; align-items: center; font-family: var(--mono); font-size: 0.7rem; color: var(--muted); overflow: hidden; }
+    .ticker-box { white-space: nowrap; animation: t 60s linear infinite; }
+    @keyframes t { from { transform: translateX(100%); } to { transform: translateX(-100%); } }
+
+    #tooltip { position: absolute; background: #162235; border: 1px solid var(--accent); padding: 5px 10px; border-radius: 4px; font-family: var(--mono); font-size: 0.7rem; pointer-events: none; z-index: 1000; display: none; }
   </style>
 </head>
 <body>
 
 <header>
-  <div class="logo-group">
-    <div class="logo-box">GR</div>
-    <div class="logo-text">
-      <h1>Geo Risk Terminal</h1>
-    </div>
-  </div>
-  <div class="market-status">
-    <div class="market-item">BRENT CRUDE <span class="market-up">78.42 ▲ 1.2%</span></div>
-    <div class="market-item">GOLD <span class="market-up">2,341 ▲ 0.4%</span></div>
-    <div class="market-item">USD/INR <span class="market-down">83.21 ▼ 0.1%</span></div>
+  <div class="logo">SENTINEL_INTEL // v4.0</div>
+  <div class="ticker-header">
+    <div>BRENT_CRUDE <span class="val-up">82.14 ▲</span></div>
+    <div>XAU_USD <span class="val-down">2148.2 ▼</span></div>
+    <div>GLOBAL_THREAT <span style="color:var(--high)">72.4/100</span></div>
   </div>
 </header>
 
-<div class="app-container">
-  <main class="map-area">
-    <div class="map-container" id="mapContainer">
-      <img src="https://upload.wikimedia.org/wikipedia/commons/8/80/World_map_-_low_resolution.svg" id="worldMap">
-    </div>
-    <div id="mapTooltip"></div>
-  </main>
+<div class="main-grid">
+  <div class="map-container" id="mapContainer">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/8/80/World_map_-_low_resolution.svg" id="worldMap">
+  </div>
+  <div id="tooltip"></div>
 
-  <aside class="side-panel">
-    <div id="panelUI">
+  <aside class="sidebar">
+    <div class="side-scroll" id="sidebarContent">
       </div>
   </aside>
 </div>
 
-<div class="ticker-wrap">
-  <div class="ticker-label">FLASH</div>
-  <div class="ticker-content" id="tickerText">
-    +++ [BREAKING] UN SECURITY COUNCIL TO CONVENE OVER MIDDLE EAST ESCALATION +++ [MARKET] WHEAT FUTURES VOLATILE AFTER UKRAINE ENERGY STRIKES +++ [INTEL] NEW SANCTIONS PACKAGE TARGETING TECHNOLOGY EXPORTS TO ASIA +++ [DISRUPTION] MAJOR PORTS IN SE ASIA REPORT 24H DELAYS +++
+<div class="ticker">
+  <div class="ticker-box">
+    +++ [FLASH] UN SECURITY COUNCIL EMERGENCY MEETING AT 16:00 UTC +++ [INTEL] CYBER DISRUPTION REPORTED IN SECTOR-7 FINANCIAL HUB +++ [MARKET] WHEAT FUTURES SPIKE AS LOGISTICS CORRIDOR CLOSES +++ [DIPLOMATIC] ENVOY RECALLED FROM REGION-B +++
   </div>
 </div>
 
 <script>
-// --- GLOBAL DATA & NEWS STORE ---
+// --- DATABASE ---
 const DIMENSIONS = ["Political", "Conflict", "Sanctions", "Unrest", "Terrorism", "Legal"];
 
-const NEWS_FEED = [
-  { country: "UA", time: "14m ago", source: "REUTERS", title: "Infrastructure damage reported after coordinated drone strikes.", link: "https://reuters.com", severity: "high" },
-  { country: "IL", time: "32m ago", source: "AL JAZEERA", title: "New escalation in border zones; diplomatic missions on alert.", link: "https://aljazeera.com", severity: "high" },
-  { country: "AR", time: "1h ago", source: "BLOOMBERG", title: "Economic reform protests intensify in Buenos Aires.", link: "https://bloomberg.com", severity: "medium" },
-  { country: "IN", time: "2h ago", source: "NDTV", title: "New trade corridor agreement signed with Gulf partners.", link: "https://ndtv.com", severity: "low" }
-];
-
-const DATA = {
-  "UA": { name: "Ukraine", lat: 48.4, lon: 31.2, vals: [85, 98, 75, 70, 55, 60], trend: "up", news: [NEWS_FEED[0]] },
-  "IL": { name: "Israel", lat: 31.0, lon: 34.8, vals: [70, 95, 20, 65, 90, 45], trend: "up", news: [NEWS_FEED[1]] },
-  "RU": { name: "Russia", lat: 61.5, lon: 105.3, vals: [50, 95, 98, 45, 40, 70], trend: "up", news: [] },
-  "AR": { name: "Argentina", lat: -38.4, lon: -63.6, vals: [65, 15, 25, 75, 10, 60], trend: "up", news: [NEWS_FEED[2]] },
-  "IN": { name: "India", lat: 20.6, lon: 78.9, vals: [35, 40, 15, 50, 45, 40], trend: "stable", news: [NEWS_FEED[3]] },
-  "US": { name: "USA", lat: 37.1, lon: -95.7, vals: [40, 20, 10, 50, 30, 25], trend: "stable", news: [] },
-  "CN": { name: "China", lat: 35.8, lon: 104.1, vals: [30, 55, 65, 40, 25, 60], trend: "up", news: [] }
+const COUNTRIES = {
+  "UA": { name: "Ukraine", lat: 48, lon: 31, vals: [85, 98, 70, 75, 60, 65], source: "Reuters", headline: "Infrastructure alerts triggered after regional strikes." },
+  "SY": { name: "Syria", lat: 34, lon: 38, vals: [92, 90, 85, 80, 85, 88], source: "AP News", headline: "Humanitarian corridors remain under heavy surveillance." },
+  "AF": { name: "Afghanistan", lat: 33, lon: 67, vals: [90, 85, 80, 75, 95, 90], source: "Al Jazeera", headline: "Internal leadership shifts reported in Kabul." },
+  "RU": { name: "Russia", lat: 61, lon: 105, vals: [50, 95, 98, 45, 40, 70], source: "Bloomberg", headline: "Energy export protocols tightened amid new sanctions." },
+  "US": { name: "United States", lat: 37, lon: -95, vals: [30, 20, 10, 55, 35, 25], source: "CNBC", headline: "Legislative gridlock impacts domestic policy outlook." },
+  "IN": { name: "India", lat: 20, lon: 78, vals: [35, 40, 15, 50, 45, 40], source: "The Hindu", headline: "Strategic trade corridors expanded with regional partners." },
+  "CN": { name: "China", lat: 35, lon: 104, vals: [30, 50, 60, 40, 30, 60], source: "SCMP", headline: "Regulatory shifts in tech sector impact global markets." },
+  "BR": { name: "Brazil", lat: -14, lon: -51, vals: [55, 40, 10, 65, 25, 50], source: "Globo", headline: "Environmental policy adjustments face domestic pushback." },
+  "MX": { name: "Mexico", lat: 23, lon: -102, vals: [65, 75, 10, 60, 80, 70], source: "El Universal", headline: "Internal security operations ramped up in border zones." },
+  "FR": { name: "France", lat: 46, lon: 2, vals: [35, 10, 5, 60, 35, 15], source: "Le Monde", headline: "Protest movements expand in major urban centers." },
+  "ZA": { name: "South Africa", lat: -30, lon: 22, vals: [65, 30, 15, 85, 25, 60], source: "Mail & Guardian", headline: "Utility grid stability reaches critical threshold." },
+  "IR": { name: "Iran", lat: 32, lon: 53, vals: [75, 60, 95, 70, 55, 85], source: "BBC", headline: "Strategic military drills reported in maritime corridors." },
+  "KP": { name: "North Korea", lat: 40, lon: 127, vals: [85, 75, 99, 30, 20, 95], source: "KCNA Watch", headline: "Long-range testing protocols initiated." },
+  "AR": { name: "Argentina", lat: -38, lon: -63, vals: [60, 15, 20, 75, 15, 65], source: "La Nación", headline: "Inflation-linked unrest reported in southern hubs." },
+  "IL": { name: "Israel", lat: 31, lon: 34, vals: [75, 95, 20, 65, 90, 50], source: "Haaretz", headline: "Border readiness elevated to Tier-1 status." },
+  "MM": { name: "Myanmar", lat: 21, lon: 95, vals: [90, 95, 85, 85, 70, 90], source: "Frontier", headline: "Regional resistance movements gain territorial traction." }
 };
 
-// --- TERMINAL LOGIC ---
+// --- CORE ENGINE ---
 const MAP_BOUNDS = { top: 85, bottom: -60, left: -180, right: 180 };
-let activeCountry = null;
 let radarChart = null;
 
 function init() {
-  renderDots();
-  renderGlobalTerminal();
+  renderMap();
+  renderGlobalBrief();
 }
 
-function renderDots() {
+function renderMap() {
   const container = document.getElementById('mapContainer');
-  Object.entries(DATA).forEach(([code, country]) => {
-    const score = Math.round(country.vals.reduce((a,b)=>a+b,0)/6);
-    const riskClass = score > 70 ? 'dot-high dot-critical' : (score > 40 ? 'dot-medium' : 'dot-low');
+  Object.entries(COUNTRIES).forEach(([code, country]) => {
+    const avg = getAvg(country.vals);
+    const riskClass = avg > 70 ? 'dot-high pulse' : (avg > 40 ? 'dot-med' : 'dot-low');
     
     const dot = document.createElement('div');
     dot.className = `dot ${riskClass}`;
     dot.dataset.code = code;
     
+    // Position
     const x = ((country.lon - MAP_BOUNDS.left) / (MAP_BOUNDS.right - MAP_BOUNDS.left)) * 100;
-    const y = ((MAP_BOUNDS.top - latToMercator(country.lat)) / (MAP_BOUNDS.top - MAP_BOUNDS.bottom)) * 100;
-    
-    dot.style.left = `${x}%`;
-    dot.style.top = `${y}%`;
+    const y = ((MAP_BOUNDS.top - country.lat) / (MAP_BOUNDS.top - MAP_BOUNDS.bottom)) * 100;
+    dot.style.left = `${x}%`; dot.style.top = `${y}%`;
 
-    dot.addEventListener('mouseenter', (e) => showTooltip(e, country.name, score));
-    dot.addEventListener('mouseleave', hideTooltip);
+    dot.addEventListener('mouseenter', e => showTip(e, country.name, avg));
+    dot.addEventListener('mouseleave', hideTip);
     dot.addEventListener('click', () => selectCountry(code));
     container.appendChild(dot);
   });
 }
 
-function latToMercator(lat) {
-    // Simple correction for Mercator cropping in standard web maps
-    if (lat > 75) return 82;
-    if (lat < -55) return -65;
-    return lat;
-}
-
-// --- VIEW CONTROLLERS ---
-
-function renderGlobalTerminal() {
-  const panel = document.getElementById('panelUI');
-  panel.innerHTML = `
-    <div class="panel-header">
-      <div style="font-family:var(--mono); font-size:0.6rem; color:var(--accent); margin-bottom:5px;">SYSTEM STATUS: ACTIVE</div>
-      <h2 style="font-size:1.2rem; letter-spacing:1px;">GLOBAL FEED</h2>
-    </div>
-    <div class="panel-body">
-      <div class="section-label">Critical Intelligence</div>
-      ${NEWS_FEED.map(n => createNewsHTML(n)).join('')}
-      <div class="section-label">Risk Leaderboard</div>
-      ${Object.entries(DATA).sort((a,b) => calcAvg(b[1].vals) - calcAvg(a[1].vals)).slice(0,4).map(([code, c]) => `
-        <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #1e3050; font-size:0.85rem; cursor:pointer" onclick="selectCountry('${code}')">
-          <span>${c.name}</span>
-          <span style="font-family:var(--mono); color:${getCol(calcAvg(c.vals))}">${calcAvg(c.vals)}</span>
-        </div>
-      `).join('')}
+function renderGlobalBrief() {
+  const sb = document.getElementById('sidebarContent');
+  sb.innerHTML = `
+    <h2 style="font-size:1.3rem; letter-spacing:1px; margin-bottom:1.5rem">GLOBAL COMMAND</h2>
+    <div class="section-label">High Priority Alerts</div>
+    ${Object.entries(COUNTRIES).filter(c => getAvg(c[1].vals) > 70).slice(0, 4).map(([code, c]) => `
+      <div class="card" onclick="selectCountry('${code}')" style="cursor:pointer">
+        <div class="card-meta"><span>${c.source.toUpperCase()}</span><span>${Math.floor(Math.random()*60)}M AGO</span></div>
+        <div class="card-title">${c.headline}</div>
+        <div style="font-family:var(--mono); font-size:0.6rem; color:var(--high)">CRITICAL RISK: ${getAvg(c.vals)}</div>
+      </div>
+    `).join('')}
+    <div class="section-label">Stability Monitor</div>
+    <div style="font-size:0.75rem; color:var(--muted); line-height:1.6">
+      Current analysis suggests a <span style="color:var(--high)">volatile week</span> for energy markets. 
+      Conflict dimensions in the Middle East and Eastern Europe are currently 12% above the 5-year average.
     </div>
   `;
 }
 
 function selectCountry(code) {
-  const country = DATA[code];
-  const avg = calcAvg(country.vals);
+  const c = COUNTRIES[code];
+  const avg = getAvg(c.vals);
   
   document.querySelectorAll('.dot').forEach(d => d.classList.remove('selected'));
   document.querySelector(`[data-code="${code}"]`).classList.add('selected');
 
-  const panel = document.getElementById('panelUI');
-  panel.innerHTML = `
-    <div class="panel-header">
-      <button onclick="renderGlobalTerminal()" style="background:none; border:none; color:var(--accent); font-family:var(--mono); font-size:0.6rem; cursor:pointer; margin-bottom:10px;">← RETURN TO GLOBAL</button>
-      <div style="display:flex; align-items:center; gap:10px;">
-        <img src="https://flagcdn.com/w40/${code.toLowerCase()}.png" style="border-radius:2px">
-        <h2 style="font-size:1.5rem">${country.name}</h2>
-      </div>
+  const sb = document.getElementById('sidebarContent');
+  sb.innerHTML = `
+    <button onclick="renderGlobalBrief()" style="background:none; border:none; color:var(--accent); font-family:var(--mono); font-size:0.6rem; margin-bottom:1rem; cursor:pointer">← BACK TO GLOBAL</button>
+    <div style="display:flex; align-items:center; gap:12px; margin-bottom:1.5rem">
+      <img src="https://flagcdn.com/w40/${code.toLowerCase()}.png" style="border-radius:2px">
+      <h2 style="font-size:1.6rem">${c.name}</h2>
     </div>
-    <div class="panel-body">
-      <div style="background:var(--surface-light); padding:15px; border-radius:6px; border:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
-        <div>
-           <div style="font-family:var(--mono); font-size:0.6rem; color:var(--muted)">COMPOSITE RISK</div>
-           <div style="font-family:var(--mono); font-size:1.8rem; font-weight:bold; color:${getCol(avg)}">${avg}</div>
-        </div>
-        <div style="text-align:right; font-family:var(--mono); font-size:0.7rem; color:${country.trend=='up'? 'var(--high)':'var(--low)'}">
-          ${country.trend=='up'?'▲ ESCALATING':'● STABLE'}
-        </div>
+
+    <div class="card" style="background:var(--surface); border-color:var(--border)">
+      <div style="font-family:var(--mono); font-size:0.6rem; color:var(--muted)">COMPOSITE RISK INDEX</div>
+      <div style="font-size:2.2rem; font-weight:bold; color:${getCol(avg)}">${avg}</div>
+    </div>
+
+    <div class="section-label">Risk Dimensions</div>
+    <div style="height:240px; margin-bottom:1.5rem"><canvas id="radarChart"></canvas></div>
+
+    <div class="section-label">Stress-Test Simulator</div>
+    ${DIMENSIONS.map((dim, i) => `
+      <div class="slider-row">
+        <span class="slider-label">${dim}</span>
+        <input type="range" min="0" max="100" value="${c.vals[i]}" oninput="updateStress(this, ${i}, '${code}')">
       </div>
+    `).join('')}
 
-      <div class="section-label">Risk Radar</div>
-      <div style="height:220px; margin-bottom:15px;"><canvas id="radarChart"></canvas></div>
-
-      <div class="section-label">Detailed Dimensions</div>
-      ${DIMENSIONS.map((dim, i) => `
-        <div class="risk-bar-container">
-          <span class="risk-bar-label">${dim}</span>
-          <div class="risk-bar-track"><div class="risk-bar-fill" style="width:${country.vals[i]}%; background:${getCol(country.vals[i])}"></div></div>
-          <span style="font-family:var(--mono); font-size:0.7rem; width:25px; text-align:right;">${country.vals[i]}</span>
-        </div>
-      `).join('')}
-
-      <div class="section-label">Local Intelligence</div>
-      ${country.news.length ? country.news.map(n => createNewsHTML(n)).join('') : '<div style="font-size:0.7rem; color:var(--muted); font-family:var(--mono)">NO ACTIVE FLASH REPORTS FOR THIS REGION</div>'}
+    <div class="section-label">Recent Intelligence</div>
+    <div class="card">
+      <div class="card-meta"><span>SOURCE: ${c.source}</span><span>LINK VERIFIED</span></div>
+      <div class="card-title">${c.headline}</div>
+      <a href="#" class="card-link">VIEW FULL SOURCE REPORT ↗</a>
     </div>
   `;
-  renderRadar(country.vals);
+  renderRadar(c.vals);
 }
 
-// --- HELPERS ---
-function createNewsHTML(n) {
-  return `
-    <div class="news-card">
-      <div class="news-meta">
-        <span>${n.time}</span>
-        <span class="severity-tag ${n.severity=='high'?'sev-high':''}">${n.severity.toUpperCase()}</span>
-      </div>
-      <div class="news-title">${n.title}</div>
-      <a href="${n.link}" target="_blank" class="source-link">TRACE SOURCE: ${n.source} ↗</a>
-    </div>
-  `;
+function updateStress(el, index, code) {
+  COUNTRIES[code].vals[index] = parseInt(el.value);
+  const newAvg = getAvg(COUNTRIES[code].vals);
+  // Update the chart and the UI without full re-render
+  renderRadar(COUNTRIES[code].vals);
+  const scoreDisplay = document.querySelector('.side-scroll div[style*="font-size:2.2rem"]');
+  if(scoreDisplay) {
+    scoreDisplay.innerText = newAvg;
+    scoreDisplay.style.color = getCol(newAvg);
+  }
 }
 
 function renderRadar(vals) {
@@ -301,22 +233,17 @@ function renderRadar(vals) {
       datasets: [{ data: vals, backgroundColor: 'rgba(0, 212, 255, 0.1)', borderColor: '#00d4ff', borderWidth: 2, pointRadius: 3 }]
     },
     options: {
-      scales: { r: { min: 0, max: 100, ticks: { display: false }, grid: { color: '#1e3050' }, angleLines: { color: '#1e3050' }, pointLabels: { color: '#94a3b8', font: { family: 'Share Tech Mono', size: 9 } } } },
+      scales: { r: { min: 0, max: 100, ticks: { display: false }, grid: { color: '#1e3050' }, angleLines: { color: '#1e3050' }, pointLabels: { color: '#64748b', font: { family: 'Share Tech Mono', size: 9 } } } },
       plugins: { legend: { display: false } },
       responsive: true, maintainAspectRatio: false
     }
   });
 }
 
-const calcAvg = (v) => Math.round(v.reduce((a,b)=>a+b,0)/6);
-const getCol = (s) => s > 70 ? 'var(--high)' : (s > 40 ? 'var(--medium)' : 'var(--low)');
-
-function showTooltip(e, name, score) {
-  const t = document.getElementById('mapTooltip');
-  t.innerHTML = `${name} <span style="color:${getCol(score)}">${score}</span>`;
-  t.style.display = 'block'; t.style.left = (e.pageX + 15) + 'px'; t.style.top = (e.pageY - 15) + 'px';
-}
-function hideTooltip() { document.getElementById('mapTooltip').style.display = 'none'; }
+function getAvg(v) { return Math.round(v.reduce((a,b)=>a+b,0)/6); }
+function getCol(s) { return s > 70 ? 'var(--high)' : (s > 40 ? 'var(--medium)' : 'var(--low)'); }
+function showTip(e, n, s) { const t = document.getElementById('tooltip'); t.innerHTML = `${n} // ${s}`; t.style.display = 'block'; t.style.left = (e.pageX+15)+'px'; t.style.top = (e.pageY-15)+'px'; }
+function hideTip() { document.getElementById('tooltip').style.display = 'none'; }
 
 window.onload = init;
 </script>
