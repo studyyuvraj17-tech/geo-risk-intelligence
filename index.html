@@ -9,11 +9,13 @@
 
 <body>
 
-<header>
+<!-- HERO -->
+<section class="hero">
   <h1>Geo Risk Intelligence</h1>
-  <p>Global Geopolitical Risk Dashboard</p>
-</header>
+  <p>Advanced Geopolitical Risk Analytics Platform</p>
+</section>
 
+<!-- MAP -->
 <section class="map-section">
   <h2>Global Risk Map</h2>
 
@@ -24,9 +26,12 @@
     <rect x="550" y="180" width="50" height="40" class="country" onclick="showCountry('China')" />
     <rect x="500" y="100" width="100" height="50" class="country" onclick="showCountry('Russia')" />
   </svg>
+
 </section>
 
+<!-- DASHBOARD -->
 <section id="dashboard" class="hidden">
+
   <h2 id="country-name"></h2>
   <p id="analysis"></p>
 
@@ -35,10 +40,10 @@
     <p id="risk-level"></p>
   </div>
 
-  <!-- RADAR CHART -->
   <canvas id="radarChart" width="300" height="300"></canvas>
 
   <div id="dimensions"></div>
+
 </section>
 
 <footer>
