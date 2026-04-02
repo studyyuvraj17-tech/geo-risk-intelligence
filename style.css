@@ -3,24 +3,36 @@ body {
   font-family: 'Segoe UI', sans-serif;
   background: radial-gradient(circle at top, #0b0f1a, #05070d);
   color: white;
-  text-align: center;
 }
 
-/* HEADER */
-header {
-  padding: 25px;
-  background: rgba(255,255,255,0.05);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(255,255,255,0.1);
+/* HERO */
+.hero {
+  text-align: center;
+  padding: 80px 20px;
+  background: linear-gradient(135deg, #111827, #020617);
+}
+
+.hero h1 {
+  font-size: 48px;
+  margin: 0;
+}
+
+.hero p {
+  opacity: 0.7;
 }
 
 /* MAP */
+.map-section {
+  text-align: center;
+}
+
 .world-map {
   width: 90%;
   max-width: 800px;
   margin: 20px auto;
-  background: #111827;
+  background: rgba(255,255,255,0.05);
   border-radius: 12px;
+  backdrop-filter: blur(10px);
 }
 
 .country {
@@ -37,11 +49,11 @@ header {
 
 /* DASHBOARD */
 #dashboard {
-  margin: 30px auto;
   max-width: 900px;
-  padding: 25px;
+  margin: 40px auto;
+  padding: 30px;
   background: rgba(255,255,255,0.05);
-  border-radius: 15px;
+  border-radius: 16px;
   backdrop-filter: blur(15px);
   animation: fadeIn 0.6s ease;
 }
@@ -52,19 +64,18 @@ header {
 
 /* SCORE */
 .score-box {
-  margin: 20px;
-  font-size: 18px;
+  margin: 20px 0;
 }
 
 /* RADAR */
 #radarChart {
+  display: block;
   margin: 20px auto;
 }
 
 /* DIMENSIONS */
 .dimension {
-  margin: 12px 0;
-  text-align: left;
+  margin: 15px 0;
 }
 
 .bar {
@@ -79,7 +90,6 @@ header {
   transition: width 1s ease;
 }
 
-/* COLORS */
 .low { background: #22c55e; }
 .medium { background: #facc15; }
 .high { background: #ef4444; }
