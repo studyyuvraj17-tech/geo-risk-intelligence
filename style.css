@@ -1,38 +1,23 @@
 body {
   margin: 0;
   font-family: 'Segoe UI', sans-serif;
-  background: radial-gradient(circle at top, #0b0f1a, #05070d);
+  background: #0b0f1a;
   color: white;
 }
 
 /* HERO */
 .hero {
   text-align: center;
-  padding: 80px 20px;
-  background: linear-gradient(135deg, #111827, #020617);
-}
-
-.hero h1 {
-  font-size: 48px;
-  margin: 0;
-}
-
-.hero p {
-  opacity: 0.7;
+  padding: 60px;
 }
 
 /* MAP */
-.map-section {
-  text-align: center;
-}
-
 .world-map {
-  width: 90%;
-  max-width: 800px;
-  margin: 20px auto;
-  background: rgba(255,255,255,0.05);
+  width: 95%;
+  margin: auto;
+  display: block;
+  background: #111827;
   border-radius: 12px;
-  backdrop-filter: blur(10px);
 }
 
 .country {
@@ -47,35 +32,27 @@ body {
   filter: drop-shadow(0 0 10px #2563eb);
 }
 
-/* DASHBOARD */
-#dashboard {
-  max-width: 900px;
-  margin: 40px auto;
-  padding: 30px;
+/* SLIDING PANEL */
+.panel {
+  position: fixed;
+  right: -400px;
+  top: 0;
+  width: 400px;
+  height: 100%;
   background: rgba(255,255,255,0.05);
-  border-radius: 16px;
   backdrop-filter: blur(15px);
-  animation: fadeIn 0.6s ease;
+  padding: 20px;
+  transition: right 0.5s ease;
+  overflow-y: auto;
 }
 
-.hidden {
-  display: none;
-}
-
-/* SCORE */
-.score-box {
-  margin: 20px 0;
-}
-
-/* RADAR */
-#radarChart {
-  display: block;
-  margin: 20px auto;
+.panel.active {
+  right: 0;
 }
 
 /* DIMENSIONS */
 .dimension {
-  margin: 15px 0;
+  margin: 12px 0;
 }
 
 .bar {
@@ -87,15 +64,8 @@ body {
 .fill {
   height: 100%;
   border-radius: 5px;
-  transition: width 1s ease;
 }
 
-.low { background: #22c55e; }
-.medium { background: #facc15; }
-.high { background: #ef4444; }
-
-/* ANIMATION */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px);}
-  to { opacity: 1; transform: translateY(0);}
-}
+.low { background: green; }
+.medium { background: orange; }
+.high { background: red; }
