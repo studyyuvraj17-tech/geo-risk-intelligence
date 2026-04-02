@@ -1,28 +1,9 @@
-document.querySelectorAll(".country").forEach(el => {
-  el.addEventListener("click", () => showCountry(el.id));
-});
-
 const data = {
-  India: {
-    analysis: "Moderate political and social pressures.",
-    values: [38,45,20,50,35,40]
-  },
-  Pakistan: {
-    analysis: "High instability and economic stress.",
-    values: [65,70,60,65,60,70]
-  },
-  USA: {
-    analysis: "Stable but facing polarization.",
-    values: [45,60,25,65,30,40]
-  },
-  China: {
-    analysis: "Strong control with global tensions.",
-    values: [30,65,50,50,40,50]
-  },
-  Russia: {
-    analysis: "High conflict and sanctions risk.",
-    values: [40,90,95,50,40,60]
-  }
+  India: { values:[38,45,20,50,35,40], text:"Moderate risk" },
+  Pakistan: { values:[65,70,60,65,60,70], text:"High instability" },
+  USA: { values:[45,60,25,65,30,40], text:"Stable but tense" },
+  China: { values:[30,65,50,50,40,50], text:"Strong but tense" },
+  Russia: { values:[40,90,95,50,40,60], text:"High conflict risk" }
 };
 
 const labels = [
@@ -30,53 +11,52 @@ const labels = [
   "Armed Conflict",
   "Economic Sanctions",
   "Civil Unrest",
-  "Terrorism & Extremism",
+  "Terrorism",
   "Legal Risk"
 ];
 
-function showCountry(country) {
-  const c = data[country];
-  const panel = document.getElementById("dashboard");
+function showCountry(c){
+  const d = data[c];
+  const panel = document.getElementById("panel");
 
   panel.classList.add("active");
 
-  document.getElementById("country-name").innerText = country;
-  document.getElementById("analysis").innerText = c.analysis;
+  document.getElementById("country").innerText = c;
+  document.getElementById("analysis").innerText = d.text;
 
-  const avg = Math.round(c.values.reduce((a,b)=>a+b)/6);
-
+  const avg = Math.round(d.values.reduce((a,b)=>a+b)/6);
   document.getElementById("score").innerText = avg;
 
   updateMeter(avg);
 
-  const dimDiv = document.getElementById("dimensions");
-  dimDiv.innerHTML = "";
-
-  c.values.forEach((v,i) => {
+  let html = "";
+  d.values.forEach((v,i)=>{
     let color = v<34?"low":v<67?"medium":"high";
 
-    dimDiv.innerHTML += `
-      <div class="dimension">
-        <strong>${labels[i]}: ${v}</strong>
+    html += `
+      <div>
+        ${labels[i]}: ${v}
         <div class="bar">
           <div class="fill ${color}" style="width:${v}%"></div>
         </div>
       </div>
     `;
   });
+
+  document.getElementById("data").innerHTML = html;
 }
 
 function updateMeter(score){
-  const fill = document.getElementById("meter-fill");
-  const text = document.getElementById("meter-text");
+  const fill = document.getElementById("fill");
+  const label = document.getElementById("label");
 
   fill.style.width = score+"%";
 
-  if(score<34){ fill.style.background="green"; text.innerText="Low"; }
-  else if(score<67){ fill.style.background="orange"; text.innerText="Medium"; }
-  else { fill.style.background="red"; text.innerText="High"; }
+  if(score<34){ fill.style.background="green"; label.innerText="Low"; }
+  else if(score<67){ fill.style.background="orange"; label.innerText="Medium"; }
+  else { fill.style.background="red"; label.innerText="High"; }
 }
 
 function closePanel(){
-  document.getElementById("dashboard").classList.remove("active");
+  document.getElementById("panel").classList.remove("active");
 }
