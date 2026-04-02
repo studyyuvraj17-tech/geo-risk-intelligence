@@ -2,27 +2,48 @@
 <html>
 <head>
   <title>Geo Risk Intelligence</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
   <link rel="stylesheet" href="style.css">
   <script src="script.js" defer></script>
 </head>
 
 <body>
 
-<h1 style="text-align:center;">Geo Risk Intelligence</h1>
+<!-- HEADER -->
+<div class="header">
+  <h1>Geo Risk Intelligence</h1>
+  <p>Global Geopolitical Risk Platform</p>
+</div>
 
+<!-- INSTRUCTION -->
+<p class="instruction">Click on any country to view risk analysis</p>
+
+<!-- MAP -->
 <div class="map-container">
-
-  <!-- STANDARD WORLD MAP -->
   <img id="map"
   src="https://upload.wikimedia.org/wikipedia/commons/8/80/World_map_-_low_resolution.svg">
+</div>
 
+<!-- LEGEND -->
+<div class="legend">
+  <span class="low-box"></span> Low Risk
+  <span class="medium-box"></span> Medium Risk
+  <span class="high-box"></span> High Risk
 </div>
 
 <!-- PANEL -->
 <div id="panel" class="panel">
-  <button onclick="closePanel()">✖</button>
+  <button class="close-btn" onclick="closePanel()">✖</button>
+
   <h2 id="country"></h2>
-  <p id="score"></p>
+  <h3 id="risk"></h3>
+
+  <canvas id="chart"></canvas>
+
+  <h4>Risk Breakdown</h4>
+  <div id="details"></div>
 </div>
 
 </body>
