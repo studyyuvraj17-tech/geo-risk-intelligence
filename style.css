@@ -1,27 +1,10 @@
 body {
   margin: 0;
-  font-family: 'Inter', sans-serif;
-  background: radial-gradient(circle at top, #0b0f1a, #020617);
+  font-family: Arial;
+  background: #0b0f1a;
   color: white;
 }
 
-/* HEADER */
-.header {
-  text-align: center;
-  padding: 30px;
-}
-
-.header h1 {
-  font-family: 'Orbitron', sans-serif;
-  font-size: 40px;
-}
-
-.instruction {
-  text-align: center;
-  color: #9ca3af;
-}
-
-/* MAP */
 .map-container {
   position: relative;
   width: 1000px;
@@ -35,38 +18,39 @@ body {
 /* DOT */
 .dot {
   position: absolute;
-  width: 12px;
-  height: 12px;
+  width: 10px;
+  height: 10px;
+  background: red;
   border-radius: 50%;
   cursor: pointer;
-  z-index: 10;
 }
-
-/* COLORS */
-.low { background: #22c55e; box-shadow: 0 0 10px #22c55e; }
-.medium { background: #facc15; box-shadow: 0 0 10px #facc15; }
-.high { background: #ef4444; box-shadow: 0 0 12px #ef4444; }
 
 /* PANEL */
 .panel {
   position: fixed;
-  right: -350px;
+  right: -320px;
   top: 0;
   width: 300px;
   height: 100%;
-  background: rgba(20,20,30,0.7);
-  backdrop-filter: blur(20px);
+
+  background: #111;
   padding: 20px;
+
   transition: 0.4s;
+
+  overflow-y: auto;   /* 🔥 FIX */
 }
 
 .panel.active {
   right: 0;
 }
 
-.close-btn {
-  background: none;
-  border: none;
-  color: white;
-  cursor: pointer;
+/* 🔥 DATA */
+#details {
+  margin-top: 20px;
+}
+
+#details p {
+  margin: 6px 0;
+  font-size: 14px;
 }
