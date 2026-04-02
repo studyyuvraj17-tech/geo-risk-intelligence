@@ -3,247 +3,345 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Sentinel | Geo-Intelligence Terminal</title>
+  <title>Geo Risk Intelligence | Professional Terminal</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Exo+2:wght@300;400;600;700&display=swap" rel="stylesheet"/>
 
   <style>
     :root {
-      --bg: #020408; --surface: #0a111f; --surface-light: #162235;
-      --border: #1e3050; --accent: #00d4ff; --low: #22c55e;
-      --medium: #f59e0b; --high: #ef4444; --text: #f8fafc;
-      --muted: #64748b; --mono: 'Share Tech Mono', monospace;
+      --bg: #05080f;
+      --surface: #0a111f;
+      --surface-light: #162235;
+      --border: #1e3050;
+      --accent: #00d4ff;
+      --low: #22c55e;
+      --medium: #f59e0b;
+      --high: #ef4444;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --mono: 'Share Tech Mono', monospace;
+      --sans: 'Exo 2', sans-serif;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; cursor: crosshair; }
-    body { font-family: 'Exo 2', sans-serif; background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--sans); background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
 
-    /* --- UI COMPONENTS --- */
-    header { z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 0.8rem 1.5rem; background: rgba(2,4,8,0.9); border-bottom: 1px solid var(--border); backdrop-filter: blur(10px); }
-    .logo { display: flex; align-items: center; gap: 10px; font-family: var(--mono); color: var(--accent); letter-spacing: 2px; }
-    .ticker-header { display: flex; gap: 20px; font-family: var(--mono); font-size: 0.7rem; }
-    .val-up { color: var(--low); } .val-down { color: var(--high); }
+    /* Grid Overlay */
+    body::before {
+      content: ''; position: fixed; inset: 0;
+      background-image: linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
+      background-size: 50px 50px; pointer-events: none; z-index: 0;
+    }
 
-    .main-grid { flex: 1; display: flex; position: relative; overflow: hidden; }
+    /* --- HEADER --- */
+    header {
+      z-index: 100; display: flex; align-items: center; justify-content: space-between;
+      padding: 1rem 2rem; background: rgba(5, 8, 15, 0.95); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border);
+    }
+    .logo-group { display: flex; align-items: center; gap: 15px; }
+    .logo-square {
+      width: 40px; height: 40px; border: 2px solid var(--accent);
+      display: grid; place-items: center; color: var(--accent);
+      font-family: var(--mono); font-weight: bold; border-radius: 4px; box-shadow: 0 0 15px rgba(0, 212, 255, 0.2);
+    }
+    .logo-text h1 { font-size: 1.1rem; text-transform: uppercase; letter-spacing: 2px; }
+    .logo-text p { font-size: 0.65rem; color: var(--muted); font-family: var(--mono); }
 
-    /* --- MAP --- */
-    .map-container { flex: 1; position: relative; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at center, #0a1628 0%, #020408 100%); }
-    .map-container img { width: 90%; filter: brightness(0.4) saturate(0.5) hue-rotate(190deg); opacity: 0.6; pointer-events: none; }
+    .header-stats { display: flex; gap: 1rem; }
+    .stat-box { background: var(--surface); border: 1px solid var(--border); padding: 5px 12px; border-radius: 4px; font-family: var(--mono); font-size: 0.75rem; }
+    .stat-box span { color: var(--accent); font-weight: bold; }
 
-    .dot { position: absolute; width: 10px; height: 10px; border-radius: 50%; transform: translate(-50%, -50%); transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-    .dot:hover { transform: translate(-50%, -50%) scale(2.5); z-index: 100; box-shadow: 0 0 20px currentColor; }
-    .dot.selected { transform: translate(-50%, -50%) scale(3); border: 2px solid white; z-index: 101; }
-    .dot-high { background: var(--high); color: var(--high); box-shadow: 0 0 10px var(--high); }
-    .dot-med { background: var(--medium); color: var(--medium); }
+    /* --- TOOLBAR --- */
+    .toolbar {
+      padding: 10px 2rem; background: rgba(10, 17, 31, 0.8); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 20px; z-index: 90;
+    }
+    .search-container { position: relative; width: 300px; }
+    #searchInput {
+      width: 100%; background: var(--surface-light); border: 1px solid var(--border);
+      color: white; padding: 8px 12px 8px 35px; border-radius: 4px; font-family: var(--mono); font-size: 0.8rem; outline: none;
+    }
+    .search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--muted); }
+    .filter-pills { display: flex; gap: 8px; }
+    .pill {
+      background: transparent; border: 1px solid var(--border); color: var(--muted);
+      padding: 5px 14px; border-radius: 20px; font-size: 0.7rem; cursor: pointer; font-family: var(--mono); transition: 0.2s;
+    }
+    .pill.active { background: var(--accent); color: var(--bg); border-color: var(--accent); font-weight: bold; }
+
+    /* --- MAIN LAYOUT --- */
+    .app-container { flex: 1; display: flex; position: relative; overflow: hidden; }
+    .map-area { flex: 1; position: relative; display: flex; align-items: center; justify-content: center; padding: 2rem; overflow: auto; }
+    .map-container { position: relative; width: 100%; max-width: 1200px; background: #08101d; border-radius: 8px; border: 1px solid var(--border); box-shadow: inset 0 0 50px rgba(0,0,0,0.5); }
+    .map-container img { width: 100%; display: block; filter: brightness(0.6) saturate(0.5) hue-rotate(190deg); pointer-events: none; }
+
+    /* --- DOTS --- */
+    .dot {
+      position: absolute; width: 12px; height: 12px; border-radius: 50%; transform: translate(-50%, -50%); cursor: pointer;
+      border: 2px solid rgba(255,255,255,0.3); transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .dot:hover { transform: translate(-50%, -50%) scale(1.8); z-index: 10; }
+    .dot.selected { transform: translate(-50%, -50%) scale(2.2); border-color: white; z-index: 11; box-shadow: 0 0 20px currentColor; }
     .dot-low { background: var(--low); color: var(--low); }
+    .dot-medium { background: var(--medium); color: var(--medium); }
+    .dot-high { background: var(--high); color: var(--high); }
+    .dot-high::after { content: ''; position: absolute; inset: -5px; border-radius: 50%; border: 1px solid var(--high); animation: pulse 2s infinite; }
+    @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(2.5); opacity: 0; } }
+
+    /* --- SIDE PANEL --- */
+    .side-panel { width: 440px; background: var(--surface); border-left: 1px solid var(--border); display: flex; flex-direction: column; z-index: 200; box-shadow: -10px 0 30px rgba(0,0,0,0.5); }
+    .panel-content { flex: 1; overflow-y: auto; padding: 1.8rem; }
     
-    .pulse::after { content: ''; position: absolute; inset: -5px; border-radius: 50%; border: 1px solid currentColor; animation: p 1.5s infinite; }
-    @keyframes p { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(3); opacity: 0; } }
-
-    /* --- SIDEBAR --- */
-    .sidebar { width: 440px; background: var(--surface); border-left: 1px solid var(--border); display: flex; flex-direction: column; box-shadow: -10px 0 30px rgba(0,0,0,0.5); z-index: 200; }
-    .side-scroll { flex: 1; overflow-y: auto; padding: 1.5rem; }
-    .side-scroll::-webkit-scrollbar { width: 4px; }
-    .side-scroll::-webkit-scrollbar-thumb { background: var(--border); }
-
-    .card { background: var(--surface-light); border: 1px solid var(--border); padding: 1rem; border-radius: 6px; margin-bottom: 1rem; transition: 0.2s; }
-    .card:hover { border-color: var(--accent); }
-    .card-meta { font-family: var(--mono); font-size: 0.6rem; color: var(--muted); margin-bottom: 5px; display: flex; justify-content: space-between; }
-    .card-title { font-size: 0.9rem; font-weight: 600; line-height: 1.3; margin-bottom: 10px; color: #fff; }
-    .card-link { font-family: var(--mono); font-size: 0.65rem; color: var(--accent); text-decoration: none; }
-
-    .section-label { font-family: var(--mono); font-size: 0.7rem; color: var(--accent); letter-spacing: 1px; text-transform: uppercase; margin: 1.5rem 0 0.8rem; border-bottom: 1px solid var(--border); padding-bottom: 4px; }
+    /* Global Dashboard UI */
+    .section-title { font-family: var(--mono); font-size: 0.75rem; color: var(--muted); border-bottom: 1px solid var(--border); padding-bottom: 6px; margin: 1.8rem 0 12px 0; letter-spacing: 1px; text-transform: uppercase; }
+    .watch-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; background: var(--surface-light); border: 1px solid var(--border); border-radius: 6px; margin-bottom: 8px; cursor: pointer; transition: 0.2s; }
+    .watch-item:hover { border-color: var(--accent); transform: translateX(4px); }
+    .alert-item { border-left: 3px solid var(--high); padding: 12px 15px; background: linear-gradient(90deg, rgba(239,68,68,0.08), transparent); margin-bottom: 10px; border-radius: 0 6px 6px 0; border: 1px solid var(--surface-light); }
+    .alert-time { font-family: var(--mono); font-size: 0.65rem; color: var(--muted); margin-bottom: 6px; }
     
-    /* --- INTERACTIVE SLIDERS --- */
-    .slider-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
-    .slider-label { width: 90px; font-size: 0.7rem; font-family: var(--mono); color: var(--muted); }
-    input[type=range] { flex: 1; height: 4px; background: #0f172a; accent-color: var(--accent); }
+    .back-btn { background: transparent; border: none; color: var(--accent); font-family: var(--mono); font-size: 0.75rem; cursor: pointer; margin-bottom: 20px; display: inline-flex; align-items: center; gap: 8px; }
 
-    /* --- FOOTER TICKER --- */
-    .ticker { height: 30px; background: #050a14; border-top: 1px solid var(--border); display: flex; align-items: center; font-family: var(--mono); font-size: 0.7rem; color: var(--muted); overflow: hidden; }
-    .ticker-box { white-space: nowrap; animation: t 60s linear infinite; }
-    @keyframes t { from { transform: translateX(100%); } to { transform: translateX(-100%); } }
+    /* Data Visuals */
+    .score-card { background: var(--surface-light); padding: 1.2rem; border-radius: 8px; margin-bottom: 1.5rem; border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+    .score-val { font-family: var(--mono); font-size: 2.2rem; font-weight: bold; color: var(--accent); }
+    .chart-container { height: 260px; margin-bottom: 2rem; }
+    .risk-list { display: flex; flex-direction: column; gap: 12px; }
+    .risk-item { display: grid; grid-template-columns: 90px 1fr 40px; align-items: center; gap: 10px; }
+    .risk-label { font-size: 0.75rem; font-family: var(--mono); color: var(--muted); }
+    .risk-bar-bg { height: 6px; background: #0f172a; border-radius: 3px; overflow: hidden; }
+    .risk-bar-fill { height: 100%; border-radius: 3px; transition: 0.8s; }
+    .risk-num { font-family: var(--mono); font-size: 0.8rem; text-align: right; }
 
-    #tooltip { position: absolute; background: #162235; border: 1px solid var(--accent); padding: 5px 10px; border-radius: 4px; font-family: var(--mono); font-size: 0.7rem; pointer-events: none; z-index: 1000; display: none; }
+    #mapTooltip { position: absolute; background: var(--surface-light); border: 1px solid var(--accent); padding: 6px 12px; border-radius: 4px; pointer-events: none; font-family: var(--mono); font-size: 0.75rem; z-index: 1000; display: none; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
   </style>
 </head>
 <body>
 
 <header>
-  <div class="logo">SENTINEL_INTEL // v4.0</div>
-  <div class="ticker-header">
-    <div>BRENT_CRUDE <span class="val-up">82.14 ▲</span></div>
-    <div>XAU_USD <span class="val-down">2148.2 ▼</span></div>
-    <div>GLOBAL_THREAT <span style="color:var(--high)">72.4/100</span></div>
+  <div class="logo-group">
+    <div class="logo-square">GR</div>
+    <div class="logo-text">
+      <h1>Geo Risk Intelligence</h1>
+      <p>STRATEGIC THREAT TERMINAL</p>
+    </div>
+  </div>
+  <div class="header-stats">
+    <div class="stat-box">MONITORED: <span id="statTotal">0</span></div>
+    <div class="stat-box">CRITICAL: <span id="statHigh" style="color:var(--high)">0</span></div>
   </div>
 </header>
 
-<div class="main-grid">
-  <div class="map-container" id="mapContainer">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/8/80/World_map_-_low_resolution.svg" id="worldMap">
+<div class="toolbar">
+  <div class="search-container">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="searchInput" placeholder="SEARCH SYSTEM...">
   </div>
-  <div id="tooltip"></div>
+  <div class="filter-pills">
+    <button class="pill active" data-filter="all">ALL</button>
+    <button class="pill" data-filter="high">HIGH RISK</button>
+    <button class="pill" data-filter="medium">MID RISK</button>
+    <button class="pill" data-filter="low">STABLE</button>
+  </div>
+</div>
 
-  <aside class="sidebar">
-    <div class="side-scroll" id="sidebarContent">
+<div class="app-container">
+  <main class="map-area">
+    <div class="map-container" id="mapContainer">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/8/80/World_map_-_low_resolution.svg" id="worldMap">
+    </div>
+    <div id="mapTooltip"></div>
+  </main>
+
+  <aside class="side-panel">
+    <div class="panel-content" id="panelContent">
       </div>
   </aside>
 </div>
 
-<div class="ticker">
-  <div class="ticker-box">
-    +++ [FLASH] UN SECURITY COUNCIL EMERGENCY MEETING AT 16:00 UTC +++ [INTEL] CYBER DISRUPTION REPORTED IN SECTOR-7 FINANCIAL HUB +++ [MARKET] WHEAT FUTURES SPIKE AS LOGISTICS CORRIDOR CLOSES +++ [DIPLOMATIC] ENVOY RECALLED FROM REGION-B +++
-  </div>
-</div>
-
 <script>
-// --- DATABASE ---
+// --- CONFIGURATION ---
 const DIMENSIONS = ["Political", "Conflict", "Sanctions", "Unrest", "Terrorism", "Legal"];
 
-const COUNTRIES = {
-  "UA": { name: "Ukraine", lat: 48, lon: 31, vals: [85, 98, 70, 75, 60, 65], source: "Reuters", headline: "Infrastructure alerts triggered after regional strikes." },
-  "SY": { name: "Syria", lat: 34, lon: 38, vals: [92, 90, 85, 80, 85, 88], source: "AP News", headline: "Humanitarian corridors remain under heavy surveillance." },
-  "AF": { name: "Afghanistan", lat: 33, lon: 67, vals: [90, 85, 80, 75, 95, 90], source: "Al Jazeera", headline: "Internal leadership shifts reported in Kabul." },
-  "RU": { name: "Russia", lat: 61, lon: 105, vals: [50, 95, 98, 45, 40, 70], source: "Bloomberg", headline: "Energy export protocols tightened amid new sanctions." },
-  "US": { name: "United States", lat: 37, lon: -95, vals: [30, 20, 10, 55, 35, 25], source: "CNBC", headline: "Legislative gridlock impacts domestic policy outlook." },
-  "IN": { name: "India", lat: 20, lon: 78, vals: [35, 40, 15, 50, 45, 40], source: "The Hindu", headline: "Strategic trade corridors expanded with regional partners." },
-  "CN": { name: "China", lat: 35, lon: 104, vals: [30, 50, 60, 40, 30, 60], source: "SCMP", headline: "Regulatory shifts in tech sector impact global markets." },
-  "BR": { name: "Brazil", lat: -14, lon: -51, vals: [55, 40, 10, 65, 25, 50], source: "Globo", headline: "Environmental policy adjustments face domestic pushback." },
-  "MX": { name: "Mexico", lat: 23, lon: -102, vals: [65, 75, 10, 60, 80, 70], source: "El Universal", headline: "Internal security operations ramped up in border zones." },
-  "FR": { name: "France", lat: 46, lon: 2, vals: [35, 10, 5, 60, 35, 15], source: "Le Monde", headline: "Protest movements expand in major urban centers." },
-  "ZA": { name: "South Africa", lat: -30, lon: 22, vals: [65, 30, 15, 85, 25, 60], source: "Mail & Guardian", headline: "Utility grid stability reaches critical threshold." },
-  "IR": { name: "Iran", lat: 32, lon: 53, vals: [75, 60, 95, 70, 55, 85], source: "BBC", headline: "Strategic military drills reported in maritime corridors." },
-  "KP": { name: "North Korea", lat: 40, lon: 127, vals: [85, 75, 99, 30, 20, 95], source: "KCNA Watch", headline: "Long-range testing protocols initiated." },
-  "AR": { name: "Argentina", lat: -38, lon: -63, vals: [60, 15, 20, 75, 15, 65], source: "La Nación", headline: "Inflation-linked unrest reported in southern hubs." },
-  "IL": { name: "Israel", lat: 31, lon: 34, vals: [75, 95, 20, 65, 90, 50], source: "Haaretz", headline: "Border readiness elevated to Tier-1 status." },
-  "MM": { name: "Myanmar", lat: 21, lon: 95, vals: [90, 95, 85, 85, 70, 90], source: "Frontier", headline: "Regional resistance movements gain territorial traction." }
+const DATA = {
+  "UA": { name: "Ukraine", lat: 48.4, lon: 31.2, vals: [85, 98, 70, 75, 60, 65], trend: "up" },
+  "SY": { name: "Syria", lat: 34.8, lon: 38.9, vals: [92, 90, 85, 80, 85, 88], trend: "stable" },
+  "AF": { name: "Afghanistan", lat: 33.9, lon: 67.7, vals: [90, 85, 80, 75, 95, 90], trend: "stable" },
+  "RU": { name: "Russia", lat: 61.5, lon: 105.3, vals: [50, 95, 98, 45, 40, 70], trend: "up" },
+  "US": { name: "United States", lat: 37.1, lon: -95.7, vals: [40, 30, 10, 55, 35, 25], trend: "up" },
+  "IN": { name: "India", lat: 20.6, lon: 78.9, vals: [35, 40, 15, 50, 45, 40], trend: "stable" },
+  "CN": { name: "China", lat: 35.8, lon: 104.1, vals: [30, 50, 60, 40, 30, 60], trend: "up" },
+  "BR": { name: "Brazil", lat: -14.2, lon: -51.9, vals: [50, 40, 10, 65, 20, 55], trend: "stable" },
+  "MX": { name: "Mexico", lat: 23.6, lon: -102.5, vals: [65, 75, 10, 60, 80, 70], trend: "up" },
+  "GB": { name: "United Kingdom", lat: 55.4, lon: -3.4, vals: [25, 15, 10, 40, 35, 20], trend: "stable" },
+  "FR": { name: "France", lat: 46.2, lon: 2.2, vals: [35, 10, 5, 55, 30, 15], trend: "up" },
+  "DE": { name: "Germany", lat: 51.1, lon: 10.4, vals: [20, 5, 5, 30, 15, 10], trend: "stable" },
+  "JP": { name: "Japan", lat: 36.2, lon: 138.2, vals: [15, 5, 5, 10, 5, 10], trend: "stable" },
+  "AU": { name: "Australia", lat: -25.2, lon: 133.7, vals: [15, 5, 5, 15, 10, 10], trend: "stable" },
+  "CA": { name: "Canada", lat: 56.1, lon: -106.3, vals: [20, 5, 5, 25, 10, 10], trend: "stable" },
+  "ZA": { name: "South Africa", lat: -30.5, lon: 22.9, vals: [60, 35, 15, 80, 20, 55], trend: "up" },
+  "EG": { name: "Egypt", lat: 26.8, lon: 30.8, vals: [65, 45, 20, 55, 60, 50], trend: "stable" },
+  "IR": { name: "Iran", lat: 32.4, lon: 53.6, vals: [75, 65, 95, 70, 55, 80], trend: "up" },
+  "KP": { name: "North Korea", lat: 40.3, lon: 127.5, vals: [85, 75, 99, 30, 20, 95], trend: "stable" },
+  "IL": { name: "Israel", lat: 31.0, lon: 34.8, vals: [70, 95, 20, 65, 90, 45], trend: "up" }
 };
 
-// --- CORE ENGINE ---
-const MAP_BOUNDS = { top: 85, bottom: -60, left: -180, right: 180 };
+// --- CORE LOGIC ---
 let radarChart = null;
+const MAP_BOUNDS = { top: 85, bottom: -60, left: -180, right: 180 };
 
-function init() {
-  renderMap();
-  renderGlobalBrief();
+function latLonToPercent(lat, lon) {
+  return {
+    x: ((lon - MAP_BOUNDS.left) / (MAP_BOUNDS.right - MAP_BOUNDS.left)) * 100,
+    y: ((MAP_BOUNDS.top - lat) / (MAP_BOUNDS.top - MAP_BOUNDS.bottom)) * 100
+  };
 }
 
-function renderMap() {
-  const container = document.getElementById('mapContainer');
-  Object.entries(COUNTRIES).forEach(([code, country]) => {
-    const avg = getAvg(country.vals);
-    const riskClass = avg > 70 ? 'dot-high pulse' : (avg > 40 ? 'dot-med' : 'dot-low');
-    
-    const dot = document.createElement('div');
-    dot.className = `dot ${riskClass}`;
-    dot.dataset.code = code;
-    
-    // Position
-    const x = ((country.lon - MAP_BOUNDS.left) / (MAP_BOUNDS.right - MAP_BOUNDS.left)) * 100;
-    const y = ((MAP_BOUNDS.top - country.lat) / (MAP_BOUNDS.top - MAP_BOUNDS.bottom)) * 100;
-    dot.style.left = `${x}%`; dot.style.top = `${y}%`;
+const getRiskLevel = (score) => {
+  if (score > 70) return { label: 'HIGH', class: 'dot-high', color: 'var(--high)' };
+  if (score > 40) return { label: 'MEDIUM', class: 'dot-medium', color: 'var(--medium)' };
+  return { label: 'LOW', class: 'dot-low', color: 'var(--low)' };
+};
 
-    dot.addEventListener('mouseenter', e => showTip(e, country.name, avg));
-    dot.addEventListener('mouseleave', hideTip);
+const calcAvg = (vals) => Math.round(vals.reduce((a, b) => a + b, 0) / vals.length);
+
+function init() {
+  renderDots();
+  updateStats();
+  renderGlobalOverview();
+  
+  document.getElementById('searchInput').addEventListener('input', handleFilter);
+  document.querySelectorAll('.pill').forEach(p => p.addEventListener('click', e => {
+    document.querySelectorAll('.pill').forEach(b => b.classList.remove('active'));
+    e.target.classList.add('active');
+    handleFilter();
+  }));
+}
+
+function updateStats() {
+  const all = Object.values(DATA);
+  document.getElementById('statTotal').innerText = all.length;
+  document.getElementById('statHigh').innerText = all.filter(c => calcAvg(c.vals) > 70).length;
+}
+
+function renderDots() {
+  const container = document.getElementById('mapContainer');
+  document.querySelectorAll('.dot').forEach(d => d.remove());
+
+  Object.entries(DATA).forEach(([code, country]) => {
+    const avg = calcAvg(country.vals);
+    const risk = getRiskLevel(avg);
+    const dot = document.createElement('div');
+    dot.className = `dot ${risk.class}`;
+    dot.dataset.code = code;
+    const pos = latLonToPercent(country.lat, country.lon);
+    dot.style.left = `${pos.x}%`; dot.style.top = `${pos.y}%`;
+
+    dot.addEventListener('mouseenter', (e) => showTooltip(e, country.name, avg));
+    dot.addEventListener('mouseleave', hideTooltip);
     dot.addEventListener('click', () => selectCountry(code));
     container.appendChild(dot);
   });
 }
 
-function renderGlobalBrief() {
-  const sb = document.getElementById('sidebarContent');
-  sb.innerHTML = `
-    <h2 style="font-size:1.3rem; letter-spacing:1px; margin-bottom:1.5rem">GLOBAL COMMAND</h2>
-    <div class="section-label">High Priority Alerts</div>
-    ${Object.entries(COUNTRIES).filter(c => getAvg(c[1].vals) > 70).slice(0, 4).map(([code, c]) => `
-      <div class="card" onclick="selectCountry('${code}')" style="cursor:pointer">
-        <div class="card-meta"><span>${c.source.toUpperCase()}</span><span>${Math.floor(Math.random()*60)}M AGO</span></div>
-        <div class="card-title">${c.headline}</div>
-        <div style="font-family:var(--mono); font-size:0.6rem; color:var(--high)">CRITICAL RISK: ${getAvg(c.vals)}</div>
+function handleFilter() {
+  const query = document.getElementById('searchInput').value.toLowerCase();
+  const filter = document.querySelector('.pill.active').dataset.filter;
+  document.querySelectorAll('.dot').forEach(dot => {
+    const country = DATA[dot.dataset.code];
+    const score = calcAvg(country.vals);
+    const riskLabel = score > 70 ? 'high' : (score > 40 ? 'medium' : 'low');
+    const matchesSearch = country.name.toLowerCase().includes(query);
+    const matchesPill = filter === 'all' || filter === riskLabel;
+    dot.style.display = (matchesSearch && matchesPill) ? 'block' : 'none';
+  });
+}
+
+function renderGlobalOverview() {
+  if (radarChart) { radarChart.destroy(); radarChart = null; }
+  document.querySelectorAll('.dot').forEach(d => d.classList.remove('selected'));
+
+  const topCountries = Object.entries(DATA)
+    .map(([code, d]) => ({ code, name: d.name, score: calcAvg(d.vals) }))
+    .sort((a,b) => b.score - a.score).slice(0, 5);
+
+  document.getElementById('panelContent').innerHTML = `
+    <h2 style="font-size:1.3rem; margin-bottom:1.5rem">GLOBAL COMMAND</h2>
+    <div class="score-card">
+      <div>
+        <p style="font-size:0.65rem; color:var(--muted); font-family:var(--mono)">GLOBAL AVERAGE RISK</p>
+        <p class="score-val">58<span style="font-size:0.8rem; opacity:0.5">/100</span></p>
+      </div>
+    </div>
+    <div class="section-title">TOP RISK WATCHLIST</div>
+    ${topCountries.map(c => `
+      <div class="watch-item" onclick="selectCountry('${c.code}')">
+        <span>${c.name}</span>
+        <span style="color:${getRiskLevel(c.score).color}">${c.score}</span>
       </div>
     `).join('')}
-    <div class="section-label">Stability Monitor</div>
-    <div style="font-size:0.75rem; color:var(--muted); line-height:1.6">
-      Current analysis suggests a <span style="color:var(--high)">volatile week</span> for energy markets. 
-      Conflict dimensions in the Middle East and Eastern Europe are currently 12% above the 5-year average.
+    <div class="section-title">ACTIVE ALERTS</div>
+    <div class="alert-item">
+      <p class="alert-time">06:14 UTC</p>
+      <p style="font-size:0.85rem">Regional escalation reported in maritime corridor.</p>
     </div>
   `;
 }
 
 function selectCountry(code) {
-  const c = COUNTRIES[code];
-  const avg = getAvg(c.vals);
-  
+  const country = DATA[code];
+  const score = calcAvg(country.vals);
+  const risk = getRiskLevel(score);
+
   document.querySelectorAll('.dot').forEach(d => d.classList.remove('selected'));
   document.querySelector(`[data-code="${code}"]`).classList.add('selected');
 
-  const sb = document.getElementById('sidebarContent');
-  sb.innerHTML = `
-    <button onclick="renderGlobalBrief()" style="background:none; border:none; color:var(--accent); font-family:var(--mono); font-size:0.6rem; margin-bottom:1rem; cursor:pointer">← BACK TO GLOBAL</button>
-    <div style="display:flex; align-items:center; gap:12px; margin-bottom:1.5rem">
-      <img src="https://flagcdn.com/w40/${code.toLowerCase()}.png" style="border-radius:2px">
-      <h2 style="font-size:1.6rem">${c.name}</h2>
+  document.getElementById('panelContent').innerHTML = `
+    <button class="back-btn" onclick="renderGlobalOverview()">← BACK TO GLOBAL</button>
+    <div style="display:flex; align-items:center; gap:12px; margin-bottom:1rem">
+      <img src="https://flagcdn.com/w80/${code.toLowerCase()}.png" style="width:35px; border-radius:2px">
+      <h2 style="font-size:1.6rem">${country.name}</h2>
     </div>
-
-    <div class="card" style="background:var(--surface); border-color:var(--border)">
-      <div style="font-family:var(--mono); font-size:0.6rem; color:var(--muted)">COMPOSITE RISK INDEX</div>
-      <div style="font-size:2.2rem; font-weight:bold; color:${getCol(avg)}">${avg}</div>
-    </div>
-
-    <div class="section-label">Risk Dimensions</div>
-    <div style="height:240px; margin-bottom:1.5rem"><canvas id="radarChart"></canvas></div>
-
-    <div class="section-label">Stress-Test Simulator</div>
-    ${DIMENSIONS.map((dim, i) => `
-      <div class="slider-row">
-        <span class="slider-label">${dim}</span>
-        <input type="range" min="0" max="100" value="${c.vals[i]}" oninput="updateStress(this, ${i}, '${code}')">
+    <div class="score-card">
+      <div>
+        <p style="font-size:0.65rem; color:var(--muted); font-family:var(--mono)">COMPOSITE INDEX</p>
+        <p class="score-val">${score}</p>
       </div>
-    `).join('')}
-
-    <div class="section-label">Recent Intelligence</div>
-    <div class="card">
-      <div class="card-meta"><span>SOURCE: ${c.source}</span><span>LINK VERIFIED</span></div>
-      <div class="card-title">${c.headline}</div>
-      <a href="#" class="card-link">VIEW FULL SOURCE REPORT ↗</a>
+    </div>
+    <div class="chart-container"><canvas id="radarChart"></canvas></div>
+    <div class="risk-list">
+      ${DIMENSIONS.map((dim, i) => `
+        <div class="risk-item">
+          <span class="risk-label">${dim}</span>
+          <div class="risk-bar-bg"><div class="risk-bar-fill" style="width:${country.vals[i]}%; background:${getRiskLevel(country.vals[i]).color}"></div></div>
+          <span class="risk-num">${country.vals[i]}</span>
+        </div>
+      `).join('')}
     </div>
   `;
-  renderRadar(c.vals);
+  renderChart(country.vals);
 }
 
-function updateStress(el, index, code) {
-  COUNTRIES[code].vals[index] = parseInt(el.value);
-  const newAvg = getAvg(COUNTRIES[code].vals);
-  // Update the chart and the UI without full re-render
-  renderRadar(COUNTRIES[code].vals);
-  const scoreDisplay = document.querySelector('.side-scroll div[style*="font-size:2.2rem"]');
-  if(scoreDisplay) {
-    scoreDisplay.innerText = newAvg;
-    scoreDisplay.style.color = getCol(newAvg);
-  }
-}
-
-function renderRadar(vals) {
-  if (radarChart) radarChart.destroy();
+function renderChart(vals) {
   const ctx = document.getElementById('radarChart').getContext('2d');
   radarChart = new Chart(ctx, {
     type: 'radar',
     data: {
       labels: DIMENSIONS,
-      datasets: [{ data: vals, backgroundColor: 'rgba(0, 212, 255, 0.1)', borderColor: '#00d4ff', borderWidth: 2, pointRadius: 3 }]
+      datasets: [{ data: vals, backgroundColor: 'rgba(0, 212, 255, 0.1)', borderColor: '#00d4ff', borderWidth: 2 }]
     },
     options: {
-      scales: { r: { min: 0, max: 100, ticks: { display: false }, grid: { color: '#1e3050' }, angleLines: { color: '#1e3050' }, pointLabels: { color: '#64748b', font: { family: 'Share Tech Mono', size: 9 } } } },
+      scales: { r: { min: 0, max: 100, ticks: { display: false }, grid: { color: '#1e3050' }, angleLines: { color: '#1e3050' }, pointLabels: { color: '#94a3b8' } } },
       plugins: { legend: { display: false } },
       responsive: true, maintainAspectRatio: false
     }
   });
 }
 
-function getAvg(v) { return Math.round(v.reduce((a,b)=>a+b,0)/6); }
-function getCol(s) { return s > 70 ? 'var(--high)' : (s > 40 ? 'var(--medium)' : 'var(--low)'); }
-function showTip(e, n, s) { const t = document.getElementById('tooltip'); t.innerHTML = `${n} // ${s}`; t.style.display = 'block'; t.style.left = (e.pageX+15)+'px'; t.style.top = (e.pageY-15)+'px'; }
-function hideTip() { document.getElementById('tooltip').style.display = 'none'; }
+function showTooltip(e, name, score) {
+  const t = document.getElementById('mapTooltip');
+  t.innerHTML = `${name} : ${score}`;
+  t.style.display = 'block'; t.style.left = (e.pageX + 15) + 'px'; t.style.top = (e.pageY - 15) + 'px';
+}
+function hideTooltip() { document.getElementById('mapTooltip').style.display = 'none'; }
 
 window.onload = init;
 </script>
