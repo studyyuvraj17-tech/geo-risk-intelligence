@@ -3,28 +3,30 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Geo Risk Intelligence | Tactical Terminal</title>
+  <title>Global Risk Research Institute | Analytical Portal</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Exo+2:wght@300;400;600;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 
   <style>
     :root {
-      --bg: #04080f;
-      --surface: #0f172a;
-      --surface-light: #16243d;
-      --border: #1e3a8a;
-      --accent: #38bdf8;
-      --low: #22c55e;
+      --bg: #0a0f1c;
+      --surface: #111827;
+      --surface-light: #1f2937;
+      --border: #374151;
+      --accent: #0ea5e9; /* Professional Cyan */
+      --accent-soft: rgba(14, 165, 233, 0.1);
+      --low: #10b981;
       --medium: #f59e0b;
       --high: #ef4444;
-      --text: #e2e8f0;
-      --muted: #64748b;
-      --mono: 'Share Tech Mono', monospace;
+      --text: #f9fafb;
+      --muted: #9ca3af;
+      --mono: 'JetBrains Mono', monospace;
+      --sans: 'Inter', sans-serif;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: 'Exo 2', sans-serif;
+      font-family: var(--sans);
       background: var(--bg);
       color: var(--text);
       height: 100vh;
@@ -33,253 +35,249 @@
       flex-direction: column;
     }
 
-    /* Scanline Effect */
-    body::after {
-      content: " ";
-      position: fixed;
-      inset: 0;
-      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), 
-                  linear-gradient(90deg, rgba(56, 189, 248, 0.02), rgba(0, 255, 0, 0.01));
-      z-index: 1000;
-      background-size: 100% 4px, 4px 100%;
-      pointer-events: none;
+    /* Professional Grid Overlay (Subtle) */
+    body::before {
+      content: ""; position: fixed; inset: 0;
+      background-image: radial-gradient(var(--border) 1px, transparent 1px);
+      background-size: 30px 30px;
+      opacity: 0.2; pointer-events: none;
     }
 
-    /* --- HEADER --- */
+    /* --- INSTITUTIONAL HEADER --- */
     header {
       z-index: 100; display: flex; align-items: center; justify-content: space-between;
-      padding: 0.8rem 2rem; background: #060b15; border-bottom: 2px solid var(--border);
-    }
-    .logo-group { display: flex; align-items: center; gap: 15px; }
-    .logo-square {
-      width: 40px; height: 40px; border: 2px solid var(--accent);
-      display: grid; place-items: center; color: var(--accent);
-      font-family: var(--mono); font-weight: bold; border-radius: 4px;
-      box-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
-    }
-
-    /* --- CONTROLS & SLIDERS --- */
-    .controls-bar {
-      padding: 10px 2rem;
-      background: rgba(15, 23, 42, 0.9);
+      padding: 1.2rem 2.5rem;
+      background: var(--surface);
       border-bottom: 1px solid var(--border);
-      display: flex; align-items: center; gap: 20px;
     }
-    .scenario-box { display: flex; align-items: center; gap: 10px; flex: 1; }
-    input[type=range] { flex: 1; accent-color: var(--accent); cursor: pointer; height: 4px; }
+    .logo-group { display: flex; align-items: center; gap: 18px; }
+    .logo-circle {
+      width: 44px; height: 44px; border: 1.5px solid var(--accent);
+      display: grid; place-items: center; color: var(--accent);
+      font-family: var(--mono); font-weight: 500; border-radius: 50%;
+    }
+    .logo-text h1 { font-size: 1.1rem; font-weight: 600; letter-spacing: -0.02em; color: var(--text); }
+    .logo-text p { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+
+    .header-metrics { display: flex; gap: 2rem; font-family: var(--mono); font-size: 0.75rem; }
+    .metric span { color: var(--accent); font-weight: 600; }
+
+    /* --- ANALYTICAL CONTROLS --- */
+    .toolbar {
+      padding: 12px 2.5rem;
+      background: rgba(17, 24, 39, 0.8);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 25px;
+    }
+    .control-group { display: flex; align-items: center; gap: 12px; flex: 1; }
+    label { font-size: 0.7rem; color: var(--muted); font-family: var(--mono); text-transform: uppercase; }
     
-    .btn-era {
-      background: var(--surface-light); border: 1px solid var(--accent);
-      color: var(--accent); font-family: var(--mono); padding: 4px 12px;
-      cursor: pointer; border-radius: 3px; font-size: 0.7rem;
+    input[type=range] { flex: 0.6; accent-color: var(--accent); cursor: pointer; height: 4px; }
+    
+    .btn-research {
+      background: var(--surface-light); border: 1px solid var(--border);
+      color: var(--text); font-family: var(--sans); padding: 5px 14px;
+      cursor: pointer; border-radius: 5px; font-size: 0.75rem; transition: 0.2s;
     }
-    .btn-era:hover { background: var(--accent); color: #000; }
+    .btn-research:hover { border-color: var(--accent); color: var(--accent); }
 
-    /* --- MAIN LAYOUT --- */
-    .app-container { flex: 1; display: flex; overflow: hidden; }
-    .map-area { flex: 1; position: relative; background: #070c18; display: flex; align-items: center; justify-content: center; }
-    .map-wrapper { position: relative; width: 95%; max-width: 1200px; }
-    .map-wrapper img { width: 100%; opacity: 0.4; filter: invert(1) hue-rotate(180deg) brightness(0.6); pointer-events: none; }
+    /* --- LAYOUT --- */
+    .main-container { flex: 1; display: flex; overflow: hidden; }
+    .map-canvas { flex: 1; position: relative; background: #0c1220; display: flex; align-items: center; justify-content: center; }
+    .map-box { position: relative; width: 90%; max-width: 1100px; }
+    .map-box img { width: 100%; opacity: 0.25; filter: saturate(0) brightness(1.2); pointer-events: none; }
 
-    /* --- DOTS --- */
-    .dot {
+    /* --- GEOSPATIAL MARKERS --- */
+    .marker {
       position: absolute; width: 10px; height: 10px; border-radius: 50%;
       transform: translate(-50%, -50%); cursor: pointer; transition: 0.3s;
-      border: 1px solid rgba(255,255,255,0.4); z-index: 10;
+      border: 2px solid var(--bg); z-index: 10;
     }
-    .dot:hover, .dot.highlight { transform: translate(-50%, -50%) scale(3); z-index: 50; box-shadow: 0 0 15px currentColor; border-color: #fff; }
-    .dot-low { background: var(--low); color: var(--low); }
-    .dot-medium { background: var(--medium); color: var(--medium); }
-    .dot-high { background: var(--high); color: var(--high); }
+    .marker:hover, .marker.highlight { transform: translate(-50%, -50%) scale(2.2); z-index: 50; box-shadow: 0 0 15px rgba(255,255,255,0.2); }
+    .m-low { background: var(--low); }
+    .m-medium { background: var(--medium); }
+    .m-high { background: var(--high); }
 
-    /* --- SIDE PANEL --- */
-    .side-panel { width: 380px; background: rgba(6, 11, 21, 0.98); border-left: 1px solid var(--border); overflow-y: auto; padding: 20px; }
-    .watch-item { 
+    /* --- RESEARCH PANEL --- */
+    .side-bar { width: 420px; background: var(--surface); border-left: 1px solid var(--border); overflow-y: auto; padding: 25px; }
+    .panel-sub { font-family: var(--mono); font-size: 0.65rem; color: var(--accent); margin-bottom: 15px; text-transform: uppercase; }
+    
+    .data-row { 
       display: flex; justify-content: space-between; align-items: center;
-      padding: 10px; background: rgba(255,255,255,0.02); 
-      border: 1px solid var(--border); margin-bottom: 6px;
-      cursor: pointer; border-radius: 4px; transition: 0.2s;
+      padding: 12px; border: 1px solid transparent; border-bottom: 1px solid var(--border);
+      cursor: pointer; transition: 0.2s;
     }
-    .watch-item:hover { border-color: var(--accent); background: rgba(56, 189, 248, 0.08); transform: translateX(3px); }
+    .data-row:hover { background: var(--accent-soft); border-color: var(--accent); border-radius: 6px; }
 
-    /* --- NEWS PULSE --- */
-    .news-ticker {
-      position: fixed; bottom: 0; width: 100%; height: 30px;
-      background: #000; border-top: 1px solid var(--border);
-      color: var(--accent); font-family: var(--mono); font-size: 0.7rem;
-      display: flex; align-items: center; z-index: 2000;
+    /* --- PULSE FOOTER --- */
+    .status-footer {
+      height: 35px; background: var(--surface); border-top: 1px solid var(--border);
+      display: flex; align-items: center; padding: 0 2.5rem; font-family: var(--mono); font-size: 0.7rem; color: var(--muted);
     }
-    .ticker-label { background: var(--high); color: #000; padding: 0 10px; font-weight: bold; height: 100%; display: flex; align-items: center; margin-right: 10px; }
+    .pulse-dot { width: 6px; height: 6px; background: var(--low); border-radius: 50%; margin-right: 10px; box-shadow: 0 0 8px var(--low); }
 
-    #mapTooltip { position: fixed; background: var(--surface-light); border: 1px solid var(--accent); padding: 5px 10px; pointer-events: none; display: none; font-family: var(--mono); font-size: 0.7rem; z-index: 3000; }
+    #tooltip { position: fixed; background: var(--surface-light); border: 1px solid var(--border); padding: 6px 12px; pointer-events: none; display: none; font-family: var(--mono); font-size: 0.7rem; border-radius: 4px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4); }
   </style>
 </head>
 <body>
 
 <header>
   <div class="logo-group">
-    <div class="logo-square">GR</div>
+    <div class="logo-circle">GR</div>
     <div class="logo-text">
-      <h1 style="font-size:1.1rem; letter-spacing:2px">GEO RISK INTELLIGENCE</h1>
-      <p style="font-size:0.6rem; color:var(--muted); font-family:var(--mono)">STRATEGIC COMMAND TERMINAL</p>
+      <h1>Global Risk Index</h1>
+      <p>Research & Comparative Analysis Portal</p>
     </div>
   </div>
-  <div style="display:flex; gap:20px; font-family:var(--mono); font-size:0.75rem">
-    <div>SYSTEM: <span style="color:var(--low)">ONLINE</span></div>
-    <div>CRITICAL: <span id="highCount" style="color:var(--high)">0</span></div>
+  <div class="header-metrics">
+    <div class="metric">DATABASE: <span>SYNCHRONIZED</span></div>
+    <div class="metric">SENSITIVITY: <span id="highMetric">0</span> HIGH-RISK AREAS</div>
   </div>
 </header>
 
-<div class="controls-bar">
-  <div class="scenario-box">
-    <span style="font-family:var(--mono); font-size:0.7rem; color:var(--accent)">CRISIS MULTIPLIER:</span>
+<div class="toolbar">
+  <div class="control-group">
+    <label>Model Sensitivity:</label>
     <input type="range" id="multiplier" min="0.5" max="2.0" step="0.1" value="1.0">
-    <span id="multVal" style="font-family:var(--mono); color:var(--accent); font-size:0.7rem">1.0x</span>
+    <span id="multVal" style="font-family:var(--mono); color:var(--accent); font-size:0.75rem">1.00x</span>
   </div>
-  <button class="btn-era" id="eraBtn">ERA: 2026 CURRENT</button>
-  <input type="text" id="searchInput" placeholder="SEARCH SYSTEM..." style="background:transparent; border:1px solid var(--border); color:white; padding:4px 10px; font-family:var(--mono); font-size:0.7rem; border-radius:3px">
+  <div style="display:flex; gap:10px">
+    <button class="btn-research" id="eraBtn">Dataset: 2026-Q2</button>
+    <input type="text" id="searchInput" placeholder="Search Region..." style="background:var(--surface-light); border:1px solid var(--border); color:white; padding:6px 12px; font-family:var(--sans); font-size:0.75rem; border-radius:5px; outline:none; width:180px">
+  </div>
 </div>
 
-<div class="app-container">
-  <main class="map-area">
-    <div class="map-wrapper" id="mapContainer">
+<div class="main-container">
+  <main class="map-canvas">
+    <div class="map-box" id="mapContainer">
       <img src="https://upload.wikimedia.org/wikipedia/commons/8/80/World_map_-_low_resolution.svg">
     </div>
-    <div id="mapTooltip"></div>
+    <div id="tooltip"></div>
   </main>
-  <aside class="side-panel" id="sidePanel"></aside>
+  <aside class="side-bar" id="sidePanel"></aside>
 </div>
 
-<div class="news-ticker">
-  <div class="ticker-label">FLASH</div>
-  <marquee id="newsPulse" scrollamount="5">INITIALIZING ENCRYPTED UPLINK... SCANNING GLOBAL PARAMETERS... NO DATA LEAKS DETECTED...</marquee>
+<div class="status-footer">
+  <div class="pulse-dot"></div>
+  <div id="statusMessage">Continuous data stream active from regional observatories...</div>
 </div>
 
 <script>
-// --- CORRECTED DATASET & COORDINATES ---
-// Using accurate Lat/Lon and Mercator projection correction
 const DATA = {
-  "UA": { name: "Ukraine", lat: 48.3, lon: 31.1, base: 88, vals: [85, 98, 75, 80, 60, 65] },
-  "RU": { name: "Russia", lat: 61.5, lon: 105.3, base: 75, vals: [60, 90, 98, 40, 35, 85] },
-  "US": { name: "United States", lat: 37.0, lon: -95.7, base: 25, vals: [35, 10, 5, 55, 30, 20] },
-  "IN": { name: "India", lat: 20.5, lon: 78.9, base: 45, vals: [40, 35, 15, 50, 45, 45] },
-  "CN": { name: "China", lat: 35.8, lon: 104.1, base: 55, vals: [35, 45, 65, 30, 20, 70] },
-  "IL": { name: "Israel", lat: 31.0, lon: 34.8, base: 78, vals: [55, 95, 25, 60, 85, 40] },
-  "IR": { name: "Iran", lat: 32.4, lon: 53.6, base: 72, vals: [80, 65, 95, 70, 50, 90] },
-  "BR": { name: "Brazil", lat: -14.2, lon: -51.9, base: 38, vals: [50, 25, 10, 65, 15, 55] },
-  "ZA": { name: "South Africa", lat: -30.5, lon: 22.9, base: 60, vals: [65, 30, 10, 85, 25, 60] },
-  "NG": { name: "Nigeria", lat: 9.0, lon: 8.6, base: 70, vals: [75, 80, 20, 70, 90, 80] },
-  "AU": { name: "Australia", lat: -25.2, lon: 133.7, base: 15, vals: [15, 5, 5, 15, 10, 10] },
-  "CA": { name: "Canada", lat: 56.1, lon: -106.3, base: 18, vals: [20, 5, 5, 25, 10, 10] },
-  "GB": { name: "United Kingdom", lat: 55.3, lon: -3.4, base: 22, vals: [25, 10, 5, 45, 30, 15] },
-  "EG": { name: "Egypt", lat: 26.8, lon: 30.8, base: 58, vals: [70, 40, 20, 50, 65, 75] },
-  "MX": { name: "Mexico", lat: 23.6, lon: -102.5, base: 55, vals: [55, 70, 15, 45, 80, 65] },
-  "KP": { name: "North Korea", lat: 40.3, lon: 127.5, base: 85, vals: [95, 85, 99, 10, 15, 98] },
-  "DE": { name: "Germany", lat: 51.1, lon: 10.4, base: 20, vals: [20, 5, 5, 35, 20, 10] },
-  "JP": { name: "Japan", lat: 36.2, lon: 138.2, base: 15, vals: [15, 10, 5, 10, 5, 15] }
+  "UA": { name: "Ukraine", lat: 48.3, lon: 31.1, base: 85, vals: [82, 95, 70, 75, 60, 65] },
+  "RU": { name: "Russia", lat: 61.5, lon: 105.3, base: 75, vals: [55, 88, 95, 40, 35, 80] },
+  "US": { name: "United States", lat: 37.0, lon: -95.7, base: 22, vals: [30, 10, 5, 50, 25, 15] },
+  "IN": { name: "India", lat: 20.5, lon: 78.9, base: 42, vals: [35, 30, 10, 45, 40, 40] },
+  "CN": { name: "China", lat: 35.8, lon: 104.1, base: 52, vals: [30, 40, 60, 25, 15, 65] },
+  "IL": { name: "Israel", lat: 31.0, lon: 34.8, base: 75, vals: [50, 90, 20, 55, 80, 35] },
+  "IR": { name: "Iran", lat: 32.4, lon: 53.6, base: 70, vals: [75, 60, 90, 65, 45, 85] },
+  "BR": { name: "Brazil", lat: -14.2, lon: -51.9, base: 35, vals: [45, 20, 5, 60, 10, 50] },
+  "ZA": { name: "South Africa", lat: -30.5, lon: 22.9, base: 62, vals: [60, 25, 5, 80, 20, 55] },
+  "AU": { name: "Australia", lat: -25.2, lon: 133.7, base: 12, vals: [10, 5, 5, 10, 5, 10] },
+  "GB": { name: "United Kingdom", lat: 55.3, lon: -3.4, base: 20, vals: [20, 5, 5, 40, 25, 10] },
+  "NG": { name: "Nigeria", lat: 9.0, lon: 8.6, base: 72, vals: [70, 75, 15, 65, 85, 75] }
 };
 
-const NEWS = ["REGIONAL ESCALATION IN RED SEA...", "CYBER ALERT LEVEL YELLOW...", "ENERGY MARKETS VOLATILE...", "DIPLOMATIC TALKS STALL...", "SUPPLY CHAIN DISRUPTION DETECTED..."];
+const LABELS = ["Political Stability", "Conflict Risk", "Sanction Exposure", "Civil Unrest", "Internal Security", "Legal/Reg"];
 let multiplier = 1.0;
 let radarChart = null;
 
-// --- MERCATOR PROJECTION CORRECTION ---
-// This ensures dots land exactly where they should on a web map
 function getMercatorPos(lat, lon) {
   const x = (lon + 180) * (100 / 360);
   const latRad = lat * Math.PI / 180;
   const mercN = Math.log(Math.tan((Math.PI / 4) + (latRad / 2)));
   const y = 50 - (100 * mercN / (2 * Math.PI)); 
-  return { x, y: y * 0.9 + 5 }; // Slight vertical tweak for the specific SVG
+  return { x, y: y * 0.9 + 5 }; 
 }
 
 function init() {
-  updateUI();
-  setInterval(() => {
-    document.getElementById('newsPulse').innerText = NEWS[Math.floor(Math.random() * NEWS.length)] + " [TIME: " + new Date().toLocaleTimeString() + "]";
-  }, 5000);
-
+  updateView();
+  
   document.getElementById('multiplier').addEventListener('input', (e) => {
     multiplier = e.target.value;
-    document.getElementById('multVal').innerText = multiplier + 'x';
-    updateUI();
+    document.getElementById('multVal').innerText = parseFloat(multiplier).toFixed(2) + 'x';
+    updateView();
   });
 
-  document.getElementById('searchInput').addEventListener('input', updateUI);
-  document.getElementById('eraBtn').addEventListener('click', () => {
-    alert("Historical Data Refreshing...");
-    updateUI();
-  });
+  document.getElementById('searchInput').addEventListener('input', updateView);
 }
 
-function updateUI() {
-  const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+function updateView() {
+  const query = document.getElementById('searchInput').value.toLowerCase();
   const container = document.getElementById('mapContainer');
   const panel = document.getElementById('sidePanel');
   
-  document.querySelectorAll('.dot').forEach(d => d.remove());
-  let html = `<h2 style="font-size:0.7rem; color:var(--accent); margin-bottom:15px; letter-spacing:1px">COMMAND WATCHLIST</h2>`;
+  document.querySelectorAll('.marker').forEach(m => m.remove());
+  let html = `<div class="panel-sub">Regional Rankings</div>`;
   let highCount = 0;
 
   Object.entries(DATA).forEach(([code, c]) => {
     const score = Math.min(100, Math.round(c.base * multiplier));
-    const risk = score > 70 ? 'var(--high)' : (score > 40 ? 'var(--medium)' : 'var(--low)');
     if (score > 70) highCount++;
 
-    if (!c.name.toLowerCase().includes(searchTerm)) return;
+    if (!c.name.toLowerCase().includes(query)) return;
 
-    // Place Dot
     const pos = getMercatorPos(c.lat, c.lon);
-    const dot = document.createElement('div');
-    dot.className = `dot ${score > 70 ? 'dot-high' : (score > 40 ? 'dot-medium' : 'dot-low')}`;
-    dot.id = `dot-${code}`;
-    dot.style.left = `${pos.x}%`;
-    dot.style.top = `${pos.y}%`;
-    dot.style.backgroundColor = risk;
-    dot.style.color = risk;
+    const marker = document.createElement('div');
+    marker.className = `marker ${score > 70 ? 'm-high' : (score > 40 ? 'm-medium' : 'm-low')}`;
+    marker.id = `marker-${code}`;
+    marker.style.left = `${pos.x}%`;
+    marker.style.top = `${pos.y}%`;
     
-    dot.onclick = () => showDetails(code, score);
-    dot.onmouseenter = (e) => showTooltip(e, c.name, score);
-    dot.onmouseleave = hideTooltip;
-    container.appendChild(dot);
+    marker.onclick = () => showStudy(code, score);
+    marker.onmouseenter = (e) => {
+      const t = document.getElementById('tooltip');
+      t.style.display = 'block';
+      t.style.left = e.clientX + 15 + 'px'; t.style.top = e.clientY + 15 + 'px';
+      t.innerHTML = `Study: ${c.name}<br>Index: ${score}`;
+    };
+    marker.onmouseleave = () => document.getElementById('tooltip').style.display = 'none';
+    container.appendChild(marker);
 
-    // List Item
     html += `
-      <div class="watch-item" onclick="showDetails('${code}', ${score})" 
-           onmouseenter="document.getElementById('dot-${code}').classList.add('highlight')"
-           onmouseleave="document.getElementById('dot-${code}').classList.remove('highlight')">
-        <span style="font-size:0.8rem; font-weight:bold">${c.name.toUpperCase()}</span>
-        <span style="color:${risk}; font-family:var(--mono); font-weight:bold">${score}</span>
+      <div class="data-row" onclick="showStudy('${code}', ${score})" 
+           onmouseenter="document.getElementById('marker-${code}').classList.add('highlight')"
+           onmouseleave="document.getElementById('marker-${code}').classList.remove('highlight')">
+        <span style="font-size:0.85rem; font-weight:400">${c.name}</span>
+        <span style="font-family:var(--mono); color:var(--accent)">${score}</span>
       </div>
     `;
   });
 
   panel.innerHTML = html;
-  document.getElementById('highCount').innerText = highCount;
+  document.getElementById('highMetric').innerText = highCount;
 }
 
-function showDetails(code, score) {
+function showStudy(code, score) {
   const c = DATA[code];
-  const risk = score > 70 ? 'var(--high)' : (score > 40 ? 'var(--medium)' : 'var(--low)');
+  const color = score > 70 ? 'var(--high)' : (score > 40 ? 'var(--medium)' : 'var(--low)');
   
   document.getElementById('sidePanel').innerHTML = `
-    <button class="btn-era" style="width:100%; margin-bottom:20px" onclick="updateUI()">← BACK TO GLOBAL</button>
-    <div style="text-align:center">
-      <h2 style="font-size:1.5rem; letter-spacing:2px">${c.name.toUpperCase()}</h2>
-      <p style="color:${risk}; font-family:var(--mono); font-size:2.5rem; font-weight:bold">${score}</p>
-      <p style="font-size:0.6rem; color:var(--muted); margin-bottom:20px">STRATEGIC VULNERABILITY INDEX</p>
+    <button class="btn-research" style="width:100%; margin-bottom:20px" onclick="updateView()">← Back to Global Analysis</button>
+    <div style="margin-bottom:30px">
+      <h2 style="font-size:1.4rem; font-weight:600">${c.name}</h2>
+      <div style="display:flex; align-items:baseline; gap:10px">
+        <span style="font-size:2.5rem; font-family:var(--mono); color:var(--accent)">${score}</span>
+        <span style="font-size:0.7rem; color:var(--muted); text-transform:uppercase">Institutional Risk Score</span>
+      </div>
     </div>
-    <div style="height:220px; background:rgba(0,0,0,0.3); border-radius:8px; padding:10px">
+    
+    <div style="height:240px; margin-bottom:30px">
       <canvas id="radarChart"></canvas>
     </div>
-    <div style="margin-top:20px">
-      ${["POLITICAL", "CONFLICT", "SANCTIONS", "UNREST", "TERROR", "LEGAL"].map((label, i) => `
-        <div style="font-size:0.6rem; margin-bottom:8px">
-          <div style="display:flex; justify-content:space-between"><span>${label}</span><span>${c.vals[i]}%</span></div>
-          <div style="height:3px; background:#000; margin-top:3px"><div style="height:100%; width:${c.vals[i]}%; background:var(--accent)"></div></div>
+    
+    <div class="panel-sub">Study Dimensions</div>
+    ${LABELS.map((label, i) => `
+      <div style="margin-bottom:12px">
+        <div style="display:flex; justify-content:space-between; font-size:0.65rem; font-family:var(--mono); margin-bottom:4px">
+          <span>${label}</span><span>${c.vals[i]}%</span>
         </div>
-      `).join('')}
-    </div>
+        <div style="height:4px; background:var(--surface-light); border-radius:2px">
+          <div style="height:100%; width:${c.vals[i]}%; background:var(--accent); border-radius:2px"></div>
+        </div>
+      </div>
+    `).join('')}
   `;
 
   const ctx = document.getElementById('radarChart').getContext('2d');
@@ -287,25 +285,16 @@ function showDetails(code, score) {
   radarChart = new Chart(ctx, {
     type: 'radar',
     data: {
-      labels: ["POL", "CON", "SAN", "UNR", "TER", "LEG"],
-      datasets: [{ data: c.vals, borderColor: '#38bdf8', backgroundColor: 'rgba(56, 189, 248, 0.2)', borderWidth: 2 }]
+      labels: ["POL", "CON", "SAN", "UNR", "SEC", "LEG"],
+      datasets: [{ data: c.vals, borderColor: '#0ea5e9', backgroundColor: 'rgba(14, 165, 233, 0.2)', borderWidth: 1.5, pointRadius: 2 }]
     },
     options: {
-      scales: { r: { min: 0, max: 100, ticks: { display: false }, grid: { color: '#1e3a8a' }, pointLabels: { color: '#64748b', font: { family: 'Share Tech Mono' } } } },
+      scales: { r: { min: 0, max: 100, ticks: { display: false }, grid: { color: 'rgba(255,255,255,0.05)' }, angleLines: { color: 'rgba(255,255,255,0.05)' }, pointLabels: { color: '#9ca3af', font: { family: 'JetBrains Mono', size: 9 } } } },
       plugins: { legend: { display: false } },
       responsive: true, maintainAspectRatio: false
     }
   });
 }
-
-function showTooltip(e, name, score) {
-  const t = document.getElementById('mapTooltip');
-  t.style.display = 'block';
-  t.style.left = e.clientX + 15 + 'px';
-  t.style.top = e.clientY + 15 + 'px';
-  t.innerHTML = `<span style="color:var(--accent)">${name.toUpperCase()}</span><br>INDEX: ${score}`;
-}
-function hideTooltip() { document.getElementById('mapTooltip').style.display = 'none'; }
 
 window.onload = init;
 </script>
