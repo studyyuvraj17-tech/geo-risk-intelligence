@@ -1,7 +1,7 @@
 const data = {
   India: {
     score: 42,
-    analysis: "India shows moderate geopolitical risk with stable governance and rising economic pressures.",
+    analysis: "India shows moderate geopolitical risk.",
     dimensions: {
       Stability: 38,
       Conflict: 45,
@@ -10,10 +10,9 @@ const data = {
       External: 30
     }
   },
-
   Pakistan: {
     score: 65,
-    analysis: "Pakistan faces political instability and economic stress.",
+    analysis: "Pakistan faces instability.",
     dimensions: {
       Stability: 65,
       Conflict: 70,
@@ -22,10 +21,9 @@ const data = {
       External: 60
     }
   },
-
   USA: {
     score: 48,
-    analysis: "USA faces internal polarization and global strategic tensions.",
+    analysis: "USA faces global tensions.",
     dimensions: {
       Stability: 45,
       Conflict: 60,
@@ -34,10 +32,9 @@ const data = {
       External: 30
     }
   },
-
   China: {
     score: 55,
-    analysis: "China maintains strong governance but faces rising geopolitical tensions.",
+    analysis: "China shows strong governance.",
     dimensions: {
       Stability: 30,
       Conflict: 65,
@@ -46,10 +43,9 @@ const data = {
       External: 70
     }
   },
-
   Russia: {
     score: 70,
-    analysis: "Russia faces high geopolitical risk due to ongoing conflicts and sanctions.",
+    analysis: "Russia faces high risk.",
     dimensions: {
       Stability: 40,
       Conflict: 90,
@@ -63,7 +59,9 @@ const data = {
 function showCountry(country) {
   const c = data[country];
 
-  document.getElementById("dashboard").classList.remove("hidden");
+  const panel = document.getElementById("dashboard");
+  panel.classList.add("active");
+
   document.getElementById("country-name").innerText = country;
   document.getElementById("analysis").innerText = c.analysis;
   document.getElementById("score").innerText = c.score;
