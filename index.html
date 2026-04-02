@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Geo Risk Intelligence | v3.0</title>
+  <title>Geo Risk | Intelligence Terminal</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Exo+2:wght@300;400;600;700&display=swap" rel="stylesheet"/>
 
   <style>
     :root {
-      --bg: #05080f;
+      --bg: #03070c;
       --surface: #0a111f;
       --surface-light: #162235;
       --border: #1e3050;
@@ -24,498 +24,301 @@
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--sans); background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
 
-    body {
-      font-family: var(--sans); background: var(--bg); color: var(--text);
-      height: 100vh; overflow: hidden; display: flex; flex-direction: column;
-    }
-
-    /* Grid Overlay */
+    /* --- BACKGROUND --- */
     body::before {
       content: ''; position: fixed; inset: 0;
-      background-image: linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
-      background-size: 50px 50px; pointer-events: none; z-index: 0;
+      background-image: linear-gradient(rgba(0,212,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(0,212,255,0.02) 1px, transparent 1px);
+      background-size: 40px 40px; pointer-events: none; z-index: 0;
     }
 
     /* --- HEADER --- */
     header {
       z-index: 100; display: flex; align-items: center; justify-content: space-between;
-      padding: 1rem 2rem; background: rgba(5, 8, 15, 0.95);
-      backdrop-filter: blur(12px); border-bottom: 1px solid var(--border);
+      padding: 0.8rem 1.5rem; background: rgba(3, 7, 12, 0.95); backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
     }
-
-    .logo-group { display: flex; align-items: center; gap: 15px; }
-    .logo-square {
-      width: 40px; height: 40px; border: 2px solid var(--accent);
-      display: grid; place-items: center; color: var(--accent);
-      font-family: var(--mono); font-weight: bold; border-radius: 4px;
-      box-shadow: 0 0 15px rgba(0, 212, 255, 0.2);
-    }
-    .logo-text h1 { font-size: 1.1rem; text-transform: uppercase; letter-spacing: 2px; }
-    .logo-text p { font-size: 0.65rem; color: var(--muted); font-family: var(--mono); letter-spacing: 1px;}
-
-    .header-stats { display: flex; gap: 1rem; }
-    .stat-box {
-      background: var(--surface); border: 1px solid var(--border);
-      padding: 5px 12px; border-radius: 4px; font-family: var(--mono); font-size: 0.75rem;
-    }
-    .stat-box span { color: var(--accent); font-weight: bold; }
-
-    /* --- TOOLBAR --- */
-    .toolbar {
-      padding: 10px 2rem; background: rgba(10, 17, 31, 0.8);
-      border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 20px; z-index: 90;
-    }
-
-    .search-container { position: relative; width: 300px; }
-    #searchInput {
-      width: 100%; background: var(--surface-light); border: 1px solid var(--border);
-      color: white; padding: 8px 12px 8px 35px; border-radius: 4px;
-      font-family: var(--mono); font-size: 0.8rem; outline: none; transition: 0.2s;
-    }
-    #searchInput:focus { border-color: var(--accent); }
-    .search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--muted); }
-
-    .filter-pills { display: flex; gap: 8px; }
-    .pill {
-      background: transparent; border: 1px solid var(--border); color: var(--muted);
-      padding: 5px 14px; border-radius: 20px; font-size: 0.7rem; cursor: pointer;
-      font-family: var(--mono); transition: 0.2s; letter-spacing: 0.5px;
-    }
-    .pill:hover { border-color: var(--accent); color: white; }
-    .pill.active { background: var(--accent); color: var(--bg); border-color: var(--accent); font-weight: bold; }
+    .logo-group { display: flex; align-items: center; gap: 12px; }
+    .logo-box { width: 32px; height: 32px; border: 2px solid var(--accent); display: grid; place-items: center; color: var(--accent); font-family: var(--mono); font-weight: bold; border-radius: 4px; box-shadow: 0 0 10px rgba(0,212,255,0.3); }
+    .logo-text h1 { font-size: 1rem; text-transform: uppercase; letter-spacing: 2px; }
+    
+    .market-status { display: flex; gap: 15px; font-family: var(--mono); font-size: 0.7rem; }
+    .market-item { padding: 4px 10px; border-radius: 3px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); }
+    .market-up { color: var(--low); }
+    .market-down { color: var(--high); }
 
     /* --- MAIN LAYOUT --- */
     .app-container { flex: 1; display: flex; position: relative; overflow: hidden; }
 
-    .map-area {
-      flex: 1; position: relative; display: flex; align-items: center; justify-content: center;
-      padding: 2rem; overflow: auto;
-    }
+    .map-area { flex: 1; position: relative; display: flex; align-items: center; justify-content: center; background: #050a14; }
+    .map-container { position: relative; width: 92%; max-width: 1100px; }
+    .map-container img { width: 100%; display: block; filter: brightness(0.5) saturate(0.6) hue-rotate(195deg); pointer-events: none; opacity: 0.8; }
 
-    .map-container {
-      position: relative; width: 100%; max-width: 1200px;
-      background: #08101d; border-radius: 8px; border: 1px solid var(--border);
-      box-shadow: inset 0 0 50px rgba(0,0,0,0.5);
-    }
-
-    .map-container img {
-      width: 100%; display: block; filter: brightness(0.6) saturate(0.5) hue-rotate(190deg);
-      pointer-events: none;
-    }
-
-    /* --- DOTS --- */
+    /* --- DOTS & INTERACTION --- */
     .dot {
-      position: absolute; width: 12px; height: 12px; border-radius: 50%;
+      position: absolute; width: 10px; height: 10px; border-radius: 50%;
       transform: translate(-50%, -50%); cursor: pointer;
-      border: 2px solid rgba(255,255,255,0.3); transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      border: 1px solid rgba(255,255,255,0.4); transition: 0.3s;
     }
-    .dot:hover { transform: translate(-50%, -50%) scale(1.8); z-index: 10; }
-    .dot.selected { transform: translate(-50%, -50%) scale(2.2); border-color: white; z-index: 11; box-shadow: 0 0 20px currentColor; }
-    
+    .dot:hover { transform: translate(-50%, -50%) scale(2); z-index: 50; box-shadow: 0 0 15px currentColor; }
+    .dot.selected { transform: translate(-50%, -50%) scale(2.5); border: 2px solid #fff; z-index: 51; box-shadow: 0 0 25px currentColor; }
     .dot-low { background: var(--low); color: var(--low); }
     .dot-medium { background: var(--medium); color: var(--medium); }
     .dot-high { background: var(--high); color: var(--high); }
     
-    .dot-high::after {
-      content: ''; position: absolute; inset: -5px; border-radius: 50%;
-      border: 1px solid var(--high); animation: pulse 2s infinite;
+    .dot-critical::after {
+      content: ''; position: absolute; inset: -6px; border-radius: 50%; border: 1px solid var(--high); animation: pulse 1.5s infinite;
     }
-    @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(2.5); opacity: 0; } }
+    @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(3); opacity: 0; } }
 
     /* --- SIDE PANEL --- */
-    .side-panel {
-      width: 440px; background: var(--surface); border-left: 1px solid var(--border);
-      display: flex; flex-direction: column; z-index: 200;
-      box-shadow: -10px 0 30px rgba(0,0,0,0.5);
-    }
-    .panel-content { flex: 1; overflow-y: auto; padding: 1.8rem; }
-    .panel-content::-webkit-scrollbar { width: 6px; }
-    .panel-content::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    .side-panel { width: 420px; background: var(--surface); border-left: 1px solid var(--border); display: flex; flex-direction: column; z-index: 200; box-shadow: -10px 0 30px rgba(0,0,0,0.5); }
+    .panel-header { padding: 1.5rem; border-bottom: 1px solid var(--border); background: rgba(255,255,255,0.02); }
+    .panel-body { flex: 1; overflow-y: auto; padding: 1.5rem; }
+    .panel-body::-webkit-scrollbar { width: 4px; }
+    .panel-body::-webkit-scrollbar-thumb { background: var(--border); }
 
-    /* --- GLOBAL DASHBOARD UI --- */
-    .section-title {
-      font-family: var(--mono); font-size: 0.75rem; color: var(--muted);
-      border-bottom: 1px solid var(--border); padding-bottom: 6px; margin: 1.8rem 0 12px 0;
-      letter-spacing: 1px; text-transform: uppercase;
+    /* --- NEWS CARDS --- */
+    .news-card {
+      background: var(--surface-light); border: 1px solid var(--border); border-radius: 6px;
+      padding: 12px; margin-bottom: 12px; transition: 0.2s; position: relative;
     }
-    .watch-item {
-      display: flex; justify-content: space-between; align-items: center;
-      padding: 12px 14px; background: var(--surface-light); border: 1px solid var(--border);
-      border-radius: 6px; margin-bottom: 8px; cursor: pointer; transition: 0.2s;
-    }
-    .watch-item:hover { border-color: var(--accent); transform: translateX(4px); box-shadow: 0 0 15px rgba(0,212,255,0.1); }
+    .news-card:hover { border-color: var(--accent); background: #1c2b42; }
+    .news-meta { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 0.6rem; color: var(--muted); margin-bottom: 6px; }
+    .news-title { font-size: 0.85rem; font-weight: 600; line-height: 1.3; margin-bottom: 8px; color: #fff; }
+    .source-link { color: var(--accent); font-family: var(--mono); font-size: 0.65rem; text-decoration: none; display: flex; align-items: center; gap: 4px; }
+    .source-link:hover { text-decoration: underline; }
     
-    .alert-item {
-      border-left: 3px solid var(--high); padding: 12px 15px;
-      background: linear-gradient(90deg, rgba(239,68,68,0.08), transparent);
-      margin-bottom: 10px; border-radius: 0 6px 6px 0; border: 1px solid var(--surface-light); border-left: 3px solid var(--high);
-    }
-    .alert-time { font-family: var(--mono); font-size: 0.65rem; color: var(--muted); margin-bottom: 6px; display: flex; align-items: center; gap: 5px; }
-    .alert-text { font-size: 0.85rem; line-height: 1.4; color: #e2e8f0; }
+    .severity-tag { font-size: 0.6rem; padding: 1px 5px; border-radius: 3px; font-weight: bold; }
+    .sev-high { background: rgba(239, 68, 68, 0.2); color: var(--high); }
 
-    .back-btn {
-      background: transparent; border: none; color: var(--accent);
-      font-family: var(--mono); font-size: 0.75rem; cursor: pointer;
-      margin-bottom: 20px; display: inline-flex; align-items: center; gap: 8px;
-      transition: 0.2s; letter-spacing: 1px;
-    }
-    .back-btn:hover { color: white; transform: translateX(-3px); }
-
-    /* --- DATA VISUALS --- */
-    .country-header { margin-bottom: 1.5rem; }
-    .country-header-top { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
-    .flag-icon { width: 35px; height: 25px; border-radius: 2px; object-fit: cover; }
-    .risk-tag {
-        font-family: var(--mono); font-size: 0.7rem; padding: 4px 10px;
-        border-radius: 4px; border: 1px solid currentColor; font-weight: bold; letter-spacing: 1px;
-    }
-
-    .score-card {
-      background: var(--surface-light); padding: 1.2rem 1.5rem; border-radius: 8px;
-      margin-bottom: 1.5rem; border: 1px solid var(--border);
-      display: flex; justify-content: space-between; align-items: center;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-    }
-    .score-val { font-family: var(--mono); font-size: 2.2rem; font-weight: bold; color: var(--accent); line-height: 1; margin-top: 5px;}
+    /* --- ANALYST UI --- */
+    .section-label { font-family: var(--mono); font-size: 0.7rem; color: var(--accent); letter-spacing: 1px; text-transform: uppercase; margin: 1.5rem 0 0.8rem; border-bottom: 1px solid var(--border); padding-bottom: 4px; }
+    .risk-bar-container { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .risk-bar-label { width: 80px; font-size: 0.7rem; font-family: var(--mono); color: var(--muted); }
+    .risk-bar-track { flex: 1; height: 4px; background: #0f172a; border-radius: 2px; }
+    .risk-bar-fill { height: 100%; border-radius: 2px; transition: 0.6s ease-out; }
     
-    .chart-container { height: 260px; margin-bottom: 2rem; }
+    /* --- TICKER --- */
+    .ticker-wrap { height: 35px; background: var(--surface); border-top: 1px solid var(--border); display: flex; align-items: center; overflow: hidden; z-index: 100; font-family: var(--mono); font-size: 0.7rem; }
+    .ticker-label { background: var(--high); color: #fff; padding: 0 15px; height: 100%; display: flex; align-items: center; font-weight: bold; z-index: 2; position: relative; }
+    .ticker-content { white-space: nowrap; animation: ticker 40s linear infinite; padding-left: 20px; color: var(--muted); }
+    @keyframes ticker { 0% { transform: translateX(0); } 100% { transform: translateX(-100%); } }
 
-    .risk-list { display: flex; flex-direction: column; gap: 12px; }
-    .risk-item { display: grid; grid-template-columns: 90px 1fr 40px; align-items: center; gap: 10px; }
-    .risk-label { font-size: 0.75rem; font-family: var(--mono); color: var(--muted); }
-    .risk-bar-bg { height: 6px; background: #0f172a; border-radius: 3px; overflow: hidden; }
-    .risk-bar-fill { height: 100%; border-radius: 3px; transition: 0.8s; }
-    .risk-num { font-family: var(--mono); font-size: 0.8rem; text-align: right; font-weight: bold; }
-
-    #mapTooltip {
-      position: absolute; background: var(--surface-light); border: 1px solid var(--accent);
-      padding: 6px 12px; border-radius: 4px; pointer-events: none;
-      font-family: var(--mono); font-size: 0.75rem; z-index: 1000; display: none;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.5); font-weight: bold;
-    }
+    /* Tooltip */
+    #mapTooltip { position: absolute; background: var(--surface-light); border: 1px solid var(--accent); padding: 5px 12px; border-radius: 4px; pointer-events: none; font-family: var(--mono); font-size: 0.75rem; z-index: 1000; display: none; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
   </style>
 </head>
 <body>
 
 <header>
   <div class="logo-group">
-    <div class="logo-square">GR</div>
+    <div class="logo-box">GR</div>
     <div class="logo-text">
-      <h1>Geo Risk Intelligence</h1>
-      <p>STRUCTURED RISK ASSESSMENTS</p>
+      <h1>Geo Risk Terminal</h1>
     </div>
   </div>
-  <div class="header-stats">
-    <div class="stat-box">SOURCES: <span style="color:var(--low)">340+</span></div>
-    <div class="stat-box">MONITORED: <span id="statTotal">0</span></div>
-    <div class="stat-box">CRITICAL: <span id="statHigh" style="color:var(--high)">0</span></div>
+  <div class="market-status">
+    <div class="market-item">BRENT CRUDE <span class="market-up">78.42 ▲ 1.2%</span></div>
+    <div class="market-item">GOLD <span class="market-up">2,341 ▲ 0.4%</span></div>
+    <div class="market-item">USD/INR <span class="market-down">83.21 ▼ 0.1%</span></div>
   </div>
 </header>
-
-<div class="toolbar">
-  <div class="search-container">
-    <span class="search-icon">🔍</span>
-    <input type="text" id="searchInput" placeholder="Search countries...">
-  </div>
-  <div class="filter-pills">
-    <button class="pill active" data-filter="all">ALL REGIONS</button>
-    <button class="pill" data-filter="high">CRITICAL RISK</button>
-    <button class="pill" data-filter="medium">TRANSITIONING</button>
-    <button class="pill" data-filter="low">STABLE</button>
-  </div>
-</div>
 
 <div class="app-container">
   <main class="map-area">
     <div class="map-container" id="mapContainer">
       <img src="https://upload.wikimedia.org/wikipedia/commons/8/80/World_map_-_low_resolution.svg" id="worldMap">
-      </div>
+    </div>
     <div id="mapTooltip"></div>
   </main>
 
   <aside class="side-panel">
-    <div class="panel-content" id="panelContent">
+    <div id="panelUI">
       </div>
   </aside>
 </div>
 
+<div class="ticker-wrap">
+  <div class="ticker-label">FLASH</div>
+  <div class="ticker-content" id="tickerText">
+    +++ [BREAKING] UN SECURITY COUNCIL TO CONVENE OVER MIDDLE EAST ESCALATION +++ [MARKET] WHEAT FUTURES VOLATILE AFTER UKRAINE ENERGY STRIKES +++ [INTEL] NEW SANCTIONS PACKAGE TARGETING TECHNOLOGY EXPORTS TO ASIA +++ [DISRUPTION] MAJOR PORTS IN SE ASIA REPORT 24H DELAYS +++
+  </div>
+</div>
+
 <script>
-// --- CONFIGURATION ---
+// --- GLOBAL DATA & NEWS STORE ---
 const DIMENSIONS = ["Political", "Conflict", "Sanctions", "Unrest", "Terrorism", "Legal"];
 
-const ALERTS = [
-  { time: "06:14 UTC", type: "critical", msg: "Escalation in maritime corridor — military assets deployed.", color: "var(--high)" },
-  { time: "04:52 UTC", type: "high", msg: "Rebel forces advance toward critical energy infrastructure.", color: "var(--high)" },
-  { time: "03:30 UTC", type: "medium", msg: "New bilateral sanctions package targeting financial sector.", color: "var(--medium)" },
-  { time: "01:18 UTC", type: "medium", msg: "Anti-government protest movement expands to 4 additional cities.", color: "var(--medium)" },
-  { time: "22:05 UTC", type: "low", msg: "Ceasefire talks resume — fragile diplomatic progress noted.", color: "var(--low)" }
+const NEWS_FEED = [
+  { country: "UA", time: "14m ago", source: "REUTERS", title: "Infrastructure damage reported after coordinated drone strikes.", link: "https://reuters.com", severity: "high" },
+  { country: "IL", time: "32m ago", source: "AL JAZEERA", title: "New escalation in border zones; diplomatic missions on alert.", link: "https://aljazeera.com", severity: "high" },
+  { country: "AR", time: "1h ago", source: "BLOOMBERG", title: "Economic reform protests intensify in Buenos Aires.", link: "https://bloomberg.com", severity: "medium" },
+  { country: "IN", time: "2h ago", source: "NDTV", title: "New trade corridor agreement signed with Gulf partners.", link: "https://ndtv.com", severity: "low" }
 ];
 
 const DATA = {
-  "UA": { name: "Ukraine", lat: 48.4, lon: 31.2, vals: [85, 98, 70, 75, 60, 65], trend: "up" },
-  "SY": { name: "Syria", lat: 34.8, lon: 38.9, vals: [92, 90, 85, 80, 85, 88], trend: "stable" },
-  "AF": { name: "Afghanistan", lat: 33.9, lon: 67.7, vals: [90, 85, 80, 75, 95, 90], trend: "stable" },
-  "RU": { name: "Russia", lat: 61.5, lon: 105.3, vals: [50, 95, 98, 45, 40, 70], trend: "up" },
-  "US": { name: "United States", lat: 37.1, lon: -95.7, vals: [40, 30, 10, 55, 35, 25], trend: "up" },
-  "IN": { name: "India", lat: 20.6, lon: 78.9, vals: [35, 40, 15, 50, 45, 40], trend: "stable" },
-  "CN": { name: "China", lat: 35.8, lon: 104.1, vals: [30, 50, 60, 40, 30, 60], trend: "up" },
-  "BR": { name: "Brazil", lat: -14.2, lon: -51.9, vals: [50, 40, 10, 65, 20, 55], trend: "stable" },
-  "MX": { name: "Mexico", lat: 23.6, lon: -102.5, vals: [65, 75, 10, 60, 80, 70], trend: "up" },
-  "GB": { name: "United Kingdom", lat: 55.4, lon: -3.4, vals: [25, 15, 10, 40, 35, 20], trend: "stable" },
-  "FR": { name: "France", lat: 46.2, lon: 2.2, vals: [35, 10, 5, 55, 30, 15], trend: "up" },
-  "DE": { name: "Germany", lat: 51.1, lon: 10.4, vals: [20, 5, 5, 30, 15, 10], trend: "stable" },
-  "JP": { name: "Japan", lat: 36.2, lon: 138.2, vals: [15, 5, 5, 10, 5, 10], trend: "stable" },
-  "AU": { name: "Australia", lat: -25.2, lon: 133.7, vals: [15, 5, 5, 15, 10, 10], trend: "stable" },
-  "CA": { name: "Canada", lat: 56.1, lon: -106.3, vals: [20, 5, 5, 25, 10, 10], trend: "stable" },
-  "ZA": { name: "South Africa", lat: -30.5, lon: 22.9, vals: [60, 35, 15, 80, 20, 55], trend: "up" },
-  "EG": { name: "Egypt", lat: 26.8, lon: 30.8, vals: [65, 45, 20, 55, 60, 50], trend: "stable" },
-  "SA": { name: "Saudi Arabia", lat: 23.8, lon: 45.0, vals: [45, 50, 15, 30, 45, 65], trend: "stable" },
-  "IR": { name: "Iran", lat: 32.4, lon: 53.6, vals: [75, 65, 95, 70, 55, 80], trend: "up" },
-  "KP": { name: "North Korea", lat: 40.3, lon: 127.5, vals: [85, 75, 99, 30, 20, 95], trend: "stable" },
-  "KR": { name: "South Korea", lat: 35.9, lon: 127.7, vals: [25, 50, 10, 20, 10, 15], trend: "stable" },
-  "VE": { name: "Venezuela", lat: 6.4, lon: -66.5, vals: [85, 45, 90, 80, 40, 85], trend: "stable" },
-  "CO": { name: "Colombia", lat: 4.5, lon: -74.0, vals: [50, 55, 10, 60, 65, 55], trend: "down" },
-  "NG": { name: "Nigeria", lat: 9.0, lon: 8.6, vals: [65, 75, 15, 70, 85, 65], trend: "up" },
-  "PK": { name: "Pakistan", lat: 30.3, lon: 69.3, vals: [75, 70, 40, 85, 90, 70], trend: "up" },
-  "TR": { name: "Turkey", lat: 38.9, lon: 35.2, vals: [60, 55, 35, 50, 60, 65], trend: "stable" },
-  "IT": { name: "Italy", lat: 41.8, lon: 12.5, vals: [35, 10, 5, 30, 15, 25], trend: "stable" },
-  "ES": { name: "Spain", lat: 40.4, lon: -3.7, vals: [30, 5, 5, 40, 20, 15], trend: "stable" },
-  "AR": { name: "Argentina", lat: -38.4, lon: -63.6, vals: [65, 15, 20, 70, 15, 60], trend: "up" },
-  "IL": { name: "Israel", lat: 31.0, lon: 34.8, vals: [70, 95, 20, 65, 90, 45], trend: "up" },
-  "ID": { name: "Indonesia", lat: -0.7, lon: 113.9, vals: [40, 35, 10, 45, 50, 40], trend: "stable" },
-  "MM": { name: "Myanmar", lat: 21.9, lon: 95.9, vals: [90, 95, 80, 85, 75, 85], trend: "up" },
-  "HT": { name: "Haiti", lat: 18.9, lon: -72.2, vals: [95, 80, 40, 95, 60, 90], trend: "up" }
+  "UA": { name: "Ukraine", lat: 48.4, lon: 31.2, vals: [85, 98, 75, 70, 55, 60], trend: "up", news: [NEWS_FEED[0]] },
+  "IL": { name: "Israel", lat: 31.0, lon: 34.8, vals: [70, 95, 20, 65, 90, 45], trend: "up", news: [NEWS_FEED[1]] },
+  "RU": { name: "Russia", lat: 61.5, lon: 105.3, vals: [50, 95, 98, 45, 40, 70], trend: "up", news: [] },
+  "AR": { name: "Argentina", lat: -38.4, lon: -63.6, vals: [65, 15, 25, 75, 10, 60], trend: "up", news: [NEWS_FEED[2]] },
+  "IN": { name: "India", lat: 20.6, lon: 78.9, vals: [35, 40, 15, 50, 45, 40], trend: "stable", news: [NEWS_FEED[3]] },
+  "US": { name: "USA", lat: 37.1, lon: -95.7, vals: [40, 20, 10, 50, 30, 25], trend: "stable", news: [] },
+  "CN": { name: "China", lat: 35.8, lon: 104.1, vals: [30, 55, 65, 40, 25, 60], trend: "up", news: [] }
 };
 
-// --- CORE LOGIC ---
-let radarChart = null;
-
+// --- TERMINAL LOGIC ---
 const MAP_BOUNDS = { top: 85, bottom: -60, left: -180, right: 180 };
-
-function latLonToPercent(lat, lon) {
-  return {
-    x: ((lon - MAP_BOUNDS.left) / (MAP_BOUNDS.right - MAP_BOUNDS.left)) * 100,
-    y: ((MAP_BOUNDS.top - lat) / (MAP_BOUNDS.top - MAP_BOUNDS.bottom)) * 100
-  };
-}
-
-const getRiskLevel = (score) => {
-  if (score > 70) return { label: 'CRITICAL', class: 'dot-high', color: 'var(--high)' };
-  if (score > 40) return { label: 'MEDIUM', class: 'dot-medium', color: 'var(--medium)' };
-  return { label: 'LOW', class: 'dot-low', color: 'var(--low)' };
-};
-
-const calcAvg = (vals) => Math.round(vals.reduce((a, b) => a + b, 0) / vals.length);
+let activeCountry = null;
+let radarChart = null;
 
 function init() {
   renderDots();
-  updateStats();
-  renderGlobalOverview(); // Load the global view by default!
-  
-  document.getElementById('searchInput').addEventListener('input', handleFilter);
-  document.querySelectorAll('.pill').forEach(p => p.addEventListener('click', e => {
-    setFilterState(e.target.dataset.filter);
-  }));
-}
-
-function updateStats() {
-  const all = Object.values(DATA);
-  document.getElementById('statTotal').innerText = all.length;
-  document.getElementById('statHigh').innerText = all.filter(c => calcAvg(c.vals) > 70).length;
+  renderGlobalTerminal();
 }
 
 function renderDots() {
   const container = document.getElementById('mapContainer');
-  document.querySelectorAll('.dot').forEach(d => d.remove());
-
   Object.entries(DATA).forEach(([code, country]) => {
-    const avg = calcAvg(country.vals);
-    const risk = getRiskLevel(avg);
+    const score = Math.round(country.vals.reduce((a,b)=>a+b,0)/6);
+    const riskClass = score > 70 ? 'dot-high dot-critical' : (score > 40 ? 'dot-medium' : 'dot-low');
     
     const dot = document.createElement('div');
-    dot.className = `dot ${risk.class}`;
+    dot.className = `dot ${riskClass}`;
     dot.dataset.code = code;
     
-    const pos = latLonToPercent(country.lat, country.lon);
-    dot.style.left = `${pos.x}%`;
-    dot.style.top = `${pos.y}%`;
+    const x = ((country.lon - MAP_BOUNDS.left) / (MAP_BOUNDS.right - MAP_BOUNDS.left)) * 100;
+    const y = ((MAP_BOUNDS.top - latToMercator(country.lat)) / (MAP_BOUNDS.top - MAP_BOUNDS.bottom)) * 100;
+    
+    dot.style.left = `${x}%`;
+    dot.style.top = `${y}%`;
 
-    dot.addEventListener('mouseenter', (e) => showTooltip(e, country.name, avg));
+    dot.addEventListener('mouseenter', (e) => showTooltip(e, country.name, score));
     dot.addEventListener('mouseleave', hideTooltip);
     dot.addEventListener('click', () => selectCountry(code));
-
     container.appendChild(dot);
   });
 }
 
-function setFilterState(filterType) {
-  document.querySelectorAll('.pill').forEach(b => {
-    b.classList.remove('active');
-    if(b.dataset.filter === filterType) b.classList.add('active');
-  });
-  handleFilter();
+function latToMercator(lat) {
+    // Simple correction for Mercator cropping in standard web maps
+    if (lat > 75) return 82;
+    if (lat < -55) return -65;
+    return lat;
 }
 
-function handleFilter() {
-  const query = document.getElementById('searchInput').value.toLowerCase();
-  const filter = document.querySelector('.pill.active').dataset.filter;
+// --- VIEW CONTROLLERS ---
 
-  document.querySelectorAll('.dot').forEach(dot => {
-    const country = DATA[dot.dataset.code];
-    const score = calcAvg(country.vals);
-    const riskScore = score > 70 ? 'high' : (score > 40 ? 'medium' : 'low');
-
-    const matchesSearch = country.name.toLowerCase().includes(query);
-    const matchesPill = filter === 'all' || filter === riskScore;
-
-    dot.style.display = (matchesSearch && matchesPill) ? 'block' : 'none';
-  });
-}
-
-// --- VIEW ROUTING ---
-
-function renderGlobalOverview() {
-  if (radarChart) { radarChart.destroy(); radarChart = null; }
-  document.querySelectorAll('.dot').forEach(d => d.classList.remove('selected'));
-
-  // Calculate top 5 countries
-  const topCountries = Object.entries(DATA)
-    .map(([code, d]) => ({ code, name: d.name, score: calcAvg(d.vals) }))
-    .sort((a,b) => b.score - a.score).slice(0, 5);
-
-  let watchHTML = topCountries.map((c, i) => `
-    <div class="watch-item" onclick="selectCountry('${c.code}')">
-        <div style="display:flex; align-items:center; gap:12px;">
-            <span style="font-family:var(--mono); color:var(--muted); font-size:0.8rem">0${i+1}</span>
-            <span style="font-weight:600; font-size:0.95rem">${c.name}</span>
+function renderGlobalTerminal() {
+  const panel = document.getElementById('panelUI');
+  panel.innerHTML = `
+    <div class="panel-header">
+      <div style="font-family:var(--mono); font-size:0.6rem; color:var(--accent); margin-bottom:5px;">SYSTEM STATUS: ACTIVE</div>
+      <h2 style="font-size:1.2rem; letter-spacing:1px;">GLOBAL FEED</h2>
+    </div>
+    <div class="panel-body">
+      <div class="section-label">Critical Intelligence</div>
+      ${NEWS_FEED.map(n => createNewsHTML(n)).join('')}
+      <div class="section-label">Risk Leaderboard</div>
+      ${Object.entries(DATA).sort((a,b) => calcAvg(b[1].vals) - calcAvg(a[1].vals)).slice(0,4).map(([code, c]) => `
+        <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #1e3050; font-size:0.85rem; cursor:pointer" onclick="selectCountry('${code}')">
+          <span>${c.name}</span>
+          <span style="font-family:var(--mono); color:${getCol(calcAvg(c.vals))}">${calcAvg(c.vals)}</span>
         </div>
-        <div style="font-family:var(--mono); font-weight:bold; color:${getRiskLevel(c.score).color}">${c.score}</div>
+      `).join('')}
     </div>
-  `).join('');
-
-  let alertsHTML = ALERTS.map(a => `
-    <div class="alert-item" style="border-left-color: ${a.color}">
-        <div class="alert-time">
-            <span style="color:${a.color}; font-size:10px;">●</span> ${a.time}
-        </div>
-        <div class="alert-text">${a.msg}</div>
-    </div>
-  `).join('');
-
-  document.getElementById('panelContent').innerHTML = `
-    <div class="country-header">
-      <h2 style="font-size:1.3rem; color:var(--text); letter-spacing:1px; margin-bottom:5px;">GLOBAL COMMAND</h2>
-      <span style="font-family:var(--mono); font-size:0.7rem; color:var(--low); letter-spacing:1px;">● LIVE INTELLIGENCE FEED</span>
-    </div>
-
-    <div class="score-card">
-      <div>
-        <p style="font-size:0.65rem; color:var(--muted); font-family:var(--mono); letter-spacing:1px;">GLOBAL THREAT INDEX</p>
-        <p class="score-val">64<span style="font-size:0.8rem; opacity:0.5">/100</span></p>
-      </div>
-      <div style="text-align:right">
-         <p style="font-size:0.75rem; color:var(--high); font-weight:bold;">▲ +2.1</p>
-      </div>
-    </div>
-
-    <div class="section-title">TOP RISK WATCHLIST</div>
-    <div class="watchlist">${watchHTML}</div>
-    <button class="pill" style="width:100%; margin-top:5px; padding:8px; text-align:center;" onclick="setFilterState('high')">VIEW ALL CRITICAL RISK →</button>
-
-    <div class="section-title" style="margin-top: 2rem;">ACTIVE ALERTS</div>
-    <div class="alert-list">${alertsHTML}</div>
   `;
 }
 
 function selectCountry(code) {
   const country = DATA[code];
-  const score = calcAvg(country.vals);
-  const risk = getRiskLevel(score);
-  const trendText = country.trend === 'up' ? '▲ RISING' : (country.trend === 'down' ? '▼ FALLING' : '● STABLE');
-  const trendColor = country.trend === 'up' ? 'var(--high)' : (country.trend === 'down' ? 'var(--low)' : 'var(--muted)');
-
+  const avg = calcAvg(country.vals);
+  
   document.querySelectorAll('.dot').forEach(d => d.classList.remove('selected'));
   document.querySelector(`[data-code="${code}"]`).classList.add('selected');
 
-  document.getElementById('panelContent').innerHTML = `
-    <button class="back-btn" onclick="renderGlobalOverview()">← BACK TO COMMAND</button>
-
-    <div class="country-header">
-      <div class="country-header-top">
-        <img src="https://flagcdn.com/w80/${code.toLowerCase()}.png" class="flag-icon">
-        <h2 style="font-size:1.6rem; letter-spacing:1px;">${country.name}</h2>
-      </div>
-      <span class="risk-tag" style="color:${risk.color}; background:rgba(255,255,255,0.05);">${risk.label} THREAT LEVEL</span>
-    </div>
-
-    <div class="score-card">
-      <div>
-        <p style="font-size:0.65rem; color:var(--muted); font-family:var(--mono); letter-spacing:1px;">COMPOSITE INDEX</p>
-        <p class="score-val">${score}<span style="font-size:0.8rem; opacity:0.5">/100</span></p>
-      </div>
-      <div style="text-align:right">
-         <p style="font-size:0.75rem; color:${trendColor}; font-weight:bold;">${trendText}</p>
+  const panel = document.getElementById('panelUI');
+  panel.innerHTML = `
+    <div class="panel-header">
+      <button onclick="renderGlobalTerminal()" style="background:none; border:none; color:var(--accent); font-family:var(--mono); font-size:0.6rem; cursor:pointer; margin-bottom:10px;">← RETURN TO GLOBAL</button>
+      <div style="display:flex; align-items:center; gap:10px;">
+        <img src="https://flagcdn.com/w40/${code.toLowerCase()}.png" style="border-radius:2px">
+        <h2 style="font-size:1.5rem">${country.name}</h2>
       </div>
     </div>
+    <div class="panel-body">
+      <div style="background:var(--surface-light); padding:15px; border-radius:6px; border:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <div>
+           <div style="font-family:var(--mono); font-size:0.6rem; color:var(--muted)">COMPOSITE RISK</div>
+           <div style="font-family:var(--mono); font-size:1.8rem; font-weight:bold; color:${getCol(avg)}">${avg}</div>
+        </div>
+        <div style="text-align:right; font-family:var(--mono); font-size:0.7rem; color:${country.trend=='up'? 'var(--high)':'var(--low)'}">
+          ${country.trend=='up'?'▲ ESCALATING':'● STABLE'}
+        </div>
+      </div>
 
-    <div class="section-title">RISK DIMENSIONS</div>
-    <div class="chart-container"><canvas id="radarChart"></canvas></div>
+      <div class="section-label">Risk Radar</div>
+      <div style="height:220px; margin-bottom:15px;"><canvas id="radarChart"></canvas></div>
 
-    <div class="risk-list">
+      <div class="section-label">Detailed Dimensions</div>
       ${DIMENSIONS.map((dim, i) => `
-        <div class="risk-item">
-          <span class="risk-label">${dim}</span>
-          <div class="risk-bar-bg">
-            <div class="risk-bar-fill" style="width:${country.vals[i]}%; background:${getRiskLevel(country.vals[i]).color}"></div>
-          </div>
-          <span class="risk-num">${country.vals[i]}</span>
+        <div class="risk-bar-container">
+          <span class="risk-bar-label">${dim}</span>
+          <div class="risk-bar-track"><div class="risk-bar-fill" style="width:${country.vals[i]}%; background:${getCol(country.vals[i])}"></div></div>
+          <span style="font-family:var(--mono); font-size:0.7rem; width:25px; text-align:right;">${country.vals[i]}</span>
         </div>
       `).join('')}
+
+      <div class="section-label">Local Intelligence</div>
+      ${country.news.length ? country.news.map(n => createNewsHTML(n)).join('') : '<div style="font-size:0.7rem; color:var(--muted); font-family:var(--mono)">NO ACTIVE FLASH REPORTS FOR THIS REGION</div>'}
     </div>
   `;
-
-  renderChart(country.vals);
+  renderRadar(country.vals);
 }
 
-function renderChart(vals) {
+// --- HELPERS ---
+function createNewsHTML(n) {
+  return `
+    <div class="news-card">
+      <div class="news-meta">
+        <span>${n.time}</span>
+        <span class="severity-tag ${n.severity=='high'?'sev-high':''}">${n.severity.toUpperCase()}</span>
+      </div>
+      <div class="news-title">${n.title}</div>
+      <a href="${n.link}" target="_blank" class="source-link">TRACE SOURCE: ${n.source} ↗</a>
+    </div>
+  `;
+}
+
+function renderRadar(vals) {
   if (radarChart) radarChart.destroy();
   const ctx = document.getElementById('radarChart').getContext('2d');
-  
   radarChart = new Chart(ctx, {
     type: 'radar',
     data: {
       labels: DIMENSIONS,
-      datasets: [{
-        data: vals, backgroundColor: 'rgba(0, 212, 255, 0.1)',
-        borderColor: '#00d4ff', borderWidth: 2, pointBackgroundColor: '#00d4ff'
-      }]
+      datasets: [{ data: vals, backgroundColor: 'rgba(0, 212, 255, 0.1)', borderColor: '#00d4ff', borderWidth: 2, pointRadius: 3 }]
     },
     options: {
-      scales: {
-        r: {
-          min: 0, max: 100, beginAtZero: true,
-          grid: { color: '#1e3050' }, angleLines: { color: '#1e3050' },
-          ticks: { display: false },
-          pointLabels: { color: '#94a3b8', font: { family: 'Share Tech Mono', size: 10 } }
-        }
-      },
+      scales: { r: { min: 0, max: 100, ticks: { display: false }, grid: { color: '#1e3050' }, angleLines: { color: '#1e3050' }, pointLabels: { color: '#94a3b8', font: { family: 'Share Tech Mono', size: 9 } } } },
       plugins: { legend: { display: false } },
       responsive: true, maintainAspectRatio: false
     }
   });
 }
 
+const calcAvg = (v) => Math.round(v.reduce((a,b)=>a+b,0)/6);
+const getCol = (s) => s > 70 ? 'var(--high)' : (s > 40 ? 'var(--medium)' : 'var(--low)');
+
 function showTooltip(e, name, score) {
   const t = document.getElementById('mapTooltip');
-  t.innerHTML = `${name} &nbsp; <span style="color:var(--accent)">${score}</span>`;
+  t.innerHTML = `${name} <span style="color:${getCol(score)}">${score}</span>`;
   t.style.display = 'block'; t.style.left = (e.pageX + 15) + 'px'; t.style.top = (e.pageY - 15) + 'px';
 }
 function hideTooltip() { document.getElementById('mapTooltip').style.display = 'none'; }
 
-// Start
 window.onload = init;
-
 </script>
 </body>
 </html>
