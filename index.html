@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Geo Risk Intelligence | v2.2</title>
+  <title>Geo Risk Intelligence | v2.3</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Exo+2:wght@300;400;600;700&display=swap" rel="stylesheet"/>
 
@@ -233,6 +233,8 @@
 // --- CONFIGURATION ---
 const DIMENSIONS = ["Political", "Conflict", "Sanctions", "Unrest", "Terrorism", "Legal"];
 
+// Expanded Database (30+ Countries)
+// vals: [Political, Conflict, Sanctions, Unrest, Terrorism, Legal]
 const DATA = {
   "UA": { name: "Ukraine", lat: 48.4, lon: 31.2, vals: [85, 98, 70, 75, 60, 65], trend: "up" },
   "SY": { name: "Syria", lat: 34.8, lon: 38.9, vals: [92, 90, 85, 80, 85, 88], trend: "stable" },
@@ -243,7 +245,30 @@ const DATA = {
   "CN": { name: "China", lat: 35.8, lon: 104.1, vals: [30, 50, 60, 40, 30, 60], trend: "up" },
   "BR": { name: "Brazil", lat: -14.2, lon: -51.9, vals: [50, 40, 10, 65, 20, 55], trend: "stable" },
   "MX": { name: "Mexico", lat: 23.6, lon: -102.5, vals: [65, 75, 10, 60, 80, 70], trend: "up" },
-  "GB": { name: "United Kingdom", lat: 55.4, lon: -3.4, vals: [25, 15, 10, 40, 35, 20], trend: "stable" }
+  "GB": { name: "United Kingdom", lat: 55.4, lon: -3.4, vals: [25, 15, 10, 40, 35, 20], trend: "stable" },
+  "FR": { name: "France", lat: 46.2, lon: 2.2, vals: [35, 10, 5, 55, 30, 15], trend: "up" },
+  "DE": { name: "Germany", lat: 51.1, lon: 10.4, vals: [20, 5, 5, 30, 15, 10], trend: "stable" },
+  "JP": { name: "Japan", lat: 36.2, lon: 138.2, vals: [15, 5, 5, 10, 5, 10], trend: "stable" },
+  "AU": { name: "Australia", lat: -25.2, lon: 133.7, vals: [15, 5, 5, 15, 10, 10], trend: "stable" },
+  "CA": { name: "Canada", lat: 56.1, lon: -106.3, vals: [20, 5, 5, 25, 10, 10], trend: "stable" },
+  "ZA": { name: "South Africa", lat: -30.5, lon: 22.9, vals: [60, 35, 15, 80, 20, 55], trend: "up" },
+  "EG": { name: "Egypt", lat: 26.8, lon: 30.8, vals: [65, 45, 20, 55, 60, 50], trend: "stable" },
+  "SA": { name: "Saudi Arabia", lat: 23.8, lon: 45.0, vals: [45, 50, 15, 30, 45, 65], trend: "stable" },
+  "IR": { name: "Iran", lat: 32.4, lon: 53.6, vals: [75, 65, 95, 70, 55, 80], trend: "up" },
+  "KP": { name: "North Korea", lat: 40.3, lon: 127.5, vals: [85, 75, 99, 30, 20, 95], trend: "stable" },
+  "KR": { name: "South Korea", lat: 35.9, lon: 127.7, vals: [25, 50, 10, 20, 10, 15], trend: "stable" },
+  "VE": { name: "Venezuela", lat: 6.4, lon: -66.5, vals: [85, 45, 90, 80, 40, 85], trend: "stable" },
+  "CO": { name: "Colombia", lat: 4.5, lon: -74.0, vals: [50, 55, 10, 60, 65, 55], trend: "down" },
+  "NG": { name: "Nigeria", lat: 9.0, lon: 8.6, vals: [65, 75, 15, 70, 85, 65], trend: "up" },
+  "PK": { name: "Pakistan", lat: 30.3, lon: 69.3, vals: [75, 70, 40, 85, 90, 70], trend: "up" },
+  "TR": { name: "Turkey", lat: 38.9, lon: 35.2, vals: [60, 55, 35, 50, 60, 65], trend: "stable" },
+  "IT": { name: "Italy", lat: 41.8, lon: 12.5, vals: [35, 10, 5, 30, 15, 25], trend: "stable" },
+  "ES": { name: "Spain", lat: 40.4, lon: -3.7, vals: [30, 5, 5, 40, 20, 15], trend: "stable" },
+  "AR": { name: "Argentina", lat: -38.4, lon: -63.6, vals: [65, 15, 20, 70, 15, 60], trend: "up" },
+  "IL": { name: "Israel", lat: 31.0, lon: 34.8, vals: [70, 95, 20, 65, 90, 45], trend: "up" },
+  "ID": { name: "Indonesia", lat: -0.7, lon: 113.9, vals: [40, 35, 10, 45, 50, 40], trend: "stable" },
+  "MM": { name: "Myanmar", lat: 21.9, lon: 95.9, vals: [90, 95, 80, 85, 75, 85], trend: "up" },
+  "HT": { name: "Haiti", lat: 18.9, lon: -72.2, vals: [95, 80, 40, 95, 60, 90], trend: "up" }
 };
 
 // --- CORE LOGIC ---
@@ -345,6 +370,10 @@ function selectCountry(code) {
   const score = calcAvg(country.vals);
   const risk = getRiskLevel(score);
 
+  // Dynamic Trend Display Logic
+  const trendText = country.trend === 'up' ? '▲ RISING' : (country.trend === 'down' ? '▼ FALLING' : '● STABLE');
+  const trendColor = country.trend === 'up' ? 'var(--high)' : (country.trend === 'down' ? 'var(--low)' : 'var(--muted)');
+
   // Update Visuals
   document.querySelectorAll('.dot').forEach(d => d.classList.remove('selected'));
   document.querySelector(`[data-code="${code}"]`).classList.add('selected');
@@ -365,8 +394,8 @@ function selectCountry(code) {
         <p class="score-val">${score}<span style="font-size:0.8rem; opacity:0.5">/100</span></p>
       </div>
       <div style="text-align:right">
-         <p style="font-size:0.7rem; color:${country.trend === 'up' ? 'var(--high)' : 'var(--low)'}">
-            ${country.trend === 'up' ? '▲ RISING' : '● STABLE'}
+         <p style="font-size:0.7rem; color:${trendColor}; font-weight:bold;">
+            ${trendText}
          </p>
       </div>
     </div>
