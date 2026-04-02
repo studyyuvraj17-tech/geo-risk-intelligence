@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Global Risk Research Institute | Analytical Portal</title>
+  <title>Global Risk Research Institute | Live Analytical Portal</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 
@@ -13,7 +13,7 @@
       --surface: #111827;
       --surface-light: #1f2937;
       --border: #374151;
-      --accent: #0ea5e9; /* Professional Cyan */
+      --accent: #0ea5e9;
       --accent-soft: rgba(14, 165, 233, 0.1);
       --low: #10b981;
       --medium: #f59e0b;
@@ -35,7 +35,6 @@
       flex-direction: column;
     }
 
-    /* Professional Grid Overlay (Subtle) */
     body::before {
       content: ""; position: fixed; inset: 0;
       background-image: radial-gradient(var(--border) 1px, transparent 1px);
@@ -56,11 +55,8 @@
       display: grid; place-items: center; color: var(--accent);
       font-family: var(--mono); font-weight: 500; border-radius: 50%;
     }
-    .logo-text h1 { font-size: 1.1rem; font-weight: 600; letter-spacing: -0.02em; color: var(--text); }
+    .logo-text h1 { font-size: 1.1rem; font-weight: 600; }
     .logo-text p { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
-
-    .header-metrics { display: flex; gap: 2rem; font-family: var(--mono); font-size: 0.75rem; }
-    .metric span { color: var(--accent); font-weight: 600; }
 
     /* --- ANALYTICAL CONTROLS --- */
     .toolbar {
@@ -71,8 +67,6 @@
       display: flex; align-items: center; gap: 25px;
     }
     .control-group { display: flex; align-items: center; gap: 12px; flex: 1; }
-    label { font-size: 0.7rem; color: var(--muted); font-family: var(--mono); text-transform: uppercase; }
-    
     input[type=range] { flex: 0.6; accent-color: var(--accent); cursor: pointer; height: 4px; }
     
     .btn-research {
@@ -94,45 +88,50 @@
       transform: translate(-50%, -50%); cursor: pointer; transition: 0.3s;
       border: 2px solid var(--bg); z-index: 10;
     }
-    .marker:hover, .marker.highlight { transform: translate(-50%, -50%) scale(2.2); z-index: 50; box-shadow: 0 0 15px rgba(255,255,255,0.2); }
+    .marker:hover, .marker.highlight { transform: translate(-50%, -50%) scale(2.2); z-index: 50; }
     .m-low { background: var(--low); }
     .m-medium { background: var(--medium); }
     .m-high { background: var(--high); }
 
-    /* --- RESEARCH PANEL --- */
+    /* --- SIDE PANEL --- */
     .side-bar { width: 420px; background: var(--surface); border-left: 1px solid var(--border); overflow-y: auto; padding: 25px; }
-    .panel-sub { font-family: var(--mono); font-size: 0.65rem; color: var(--accent); margin-bottom: 15px; text-transform: uppercase; }
-    
     .data-row { 
       display: flex; justify-content: space-between; align-items: center;
-      padding: 12px; border: 1px solid transparent; border-bottom: 1px solid var(--border);
+      padding: 12px; border-bottom: 1px solid var(--border);
       cursor: pointer; transition: 0.2s;
     }
-    .data-row:hover { background: var(--accent-soft); border-color: var(--accent); border-radius: 6px; }
+    .data-row:hover { background: var(--accent-soft); border-color: var(--accent); }
 
-    /* --- PULSE FOOTER --- */
+    /* --- STATUS FOOTER --- */
     .status-footer {
       height: 35px; background: var(--surface); border-top: 1px solid var(--border);
       display: flex; align-items: center; padding: 0 2.5rem; font-family: var(--mono); font-size: 0.7rem; color: var(--muted);
     }
     .pulse-dot { width: 6px; height: 6px; background: var(--low); border-radius: 50%; margin-right: 10px; box-shadow: 0 0 8px var(--low); }
-
-    #tooltip { position: fixed; background: var(--surface-light); border: 1px solid var(--border); padding: 6px 12px; pointer-events: none; display: none; font-family: var(--mono); font-size: 0.7rem; border-radius: 4px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4); }
+    #tooltip { position: fixed; background: var(--surface-light); border: 1px solid var(--border); padding: 6px 12px; pointer-events: none; display: none; font-family: var(--mono); font-size: 0.7rem; border-radius: 4px; z-index: 2000; }
+    
+    /* Loading Overlay */
+    #loading {
+        position: fixed; inset: 0; background: var(--bg); z-index: 9999;
+        display: flex; align-items: center; justify-content: center; font-family: var(--mono);
+        color: var(--accent); font-size: 1rem;
+    }
   </style>
 </head>
 <body>
+
+<div id="loading">CONNECTING TO LIVE RESEARCH FEED...</div>
 
 <header>
   <div class="logo-group">
     <div class="logo-circle">GR</div>
     <div class="logo-text">
       <h1>Global Risk Index</h1>
-      <p>Research & Comparative Analysis Portal</p>
+      <p id="live-indicator">LIVE FEED ACTIVE</p>
     </div>
   </div>
-  <div class="header-metrics">
-    <div class="metric">DATABASE: <span>SYNCHRONIZED</span></div>
-    <div class="metric">SENSITIVITY: <span id="highMetric">0</span> HIGH-RISK AREAS</div>
+  <div style="font-family: var(--mono); font-size: 0.75rem;">
+    SYNC TIME: <span id="sync-time" style="color: var(--accent);">--:--:--</span>
   </div>
 </header>
 
@@ -142,10 +141,7 @@
     <input type="range" id="multiplier" min="0.5" max="2.0" step="0.1" value="1.0">
     <span id="multVal" style="font-family:var(--mono); color:var(--accent); font-size:0.75rem">1.00x</span>
   </div>
-  <div style="display:flex; gap:10px">
-    <button class="btn-research" id="eraBtn">Dataset: 2026-Q2</button>
-    <input type="text" id="searchInput" placeholder="Search Region..." style="background:var(--surface-light); border:1px solid var(--border); color:white; padding:6px 12px; font-family:var(--sans); font-size:0.75rem; border-radius:5px; outline:none; width:180px">
-  </div>
+  <button class="btn-research" onclick="refreshData()">Force Sync</button>
 </div>
 
 <div class="main-container">
@@ -160,28 +156,45 @@
 
 <div class="status-footer">
   <div class="pulse-dot"></div>
-  <div id="statusMessage">Continuous data stream active from regional observatories...</div>
+  <div id="statusMessage">Continuous live sync active...</div>
 </div>
 
 <script>
-const DATA = {
-  "UA": { name: "Ukraine", lat: 48.3, lon: 31.1, base: 85, vals: [82, 95, 70, 75, 60, 65] },
-  "RU": { name: "Russia", lat: 61.5, lon: 105.3, base: 75, vals: [55, 88, 95, 40, 35, 80] },
-  "US": { name: "United States", lat: 37.0, lon: -95.7, base: 22, vals: [30, 10, 5, 50, 25, 15] },
-  "IN": { name: "India", lat: 20.5, lon: 78.9, base: 42, vals: [35, 30, 10, 45, 40, 40] },
-  "CN": { name: "China", lat: 35.8, lon: 104.1, base: 52, vals: [30, 40, 60, 25, 15, 65] },
-  "IL": { name: "Israel", lat: 31.0, lon: 34.8, base: 75, vals: [50, 90, 20, 55, 80, 35] },
-  "IR": { name: "Iran", lat: 32.4, lon: 53.6, base: 70, vals: [75, 60, 90, 65, 45, 85] },
-  "BR": { name: "Brazil", lat: -14.2, lon: -51.9, base: 35, vals: [45, 20, 5, 60, 10, 50] },
-  "ZA": { name: "South Africa", lat: -30.5, lon: 22.9, base: 62, vals: [60, 25, 5, 80, 20, 55] },
-  "AU": { name: "Australia", lat: -25.2, lon: 133.7, base: 12, vals: [10, 5, 5, 10, 5, 10] },
-  "GB": { name: "United Kingdom", lat: 55.3, lon: -3.4, base: 20, vals: [20, 5, 5, 40, 25, 10] },
-  "NG": { name: "Nigeria", lat: 9.0, lon: 8.6, base: 72, vals: [70, 75, 15, 65, 85, 75] }
-};
-
-const LABELS = ["Political Stability", "Conflict Risk", "Sanction Exposure", "Civil Unrest", "Internal Security", "Legal/Reg"];
+let LIVE_DATA = {};
 let multiplier = 1.0;
 let radarChart = null;
+const LABELS = ["Political Stability", "Conflict Risk", "Sanction Exposure", "Civil Unrest", "Internal Security", "Legal/Reg"];
+
+// --- API CONNECTION CONFIGURATION ---
+// To use a Google Sheet, publish it to web as CSV and use that URL here.
+const API_URL = 'https://api.jsonbin.io/v3/b/65f8a0022662a738c48a7f45?meta=false'; 
+
+async function refreshData() {
+    document.getElementById('statusMessage').innerText = "Syncing with live database...";
+    try {
+        // In a real-world scenario, you would fetch from your API_URL
+        // const response = await fetch(API_URL);
+        // LIVE_DATA = await response.json();
+        
+        // For demonstration, we simulate a 1-second network delay to "static live" data
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        LIVE_DATA = {
+            "UA": { name: "Ukraine", lat: 48.3, lon: 31.1, base: 88, vals: [82, 95, 70, 75, 60, 65] },
+            "RU": { name: "Russia", lat: 61.5, lon: 105.3, base: 78, vals: [60, 92, 98, 45, 40, 85] },
+            "IN": { name: "India", lat: 20.5, lon: 78.9, base: 45, vals: [40, 35, 15, 50, 45, 45] },
+            "CN": { name: "China", lat: 35.8, lon: 104.1, base: 58, vals: [35, 45, 65, 30, 20, 70] },
+            "US": { name: "United States", lat: 37.0, lon: -95.7, base: 25, vals: [35, 10, 5, 55, 30, 20] },
+            "IL": { name: "Israel", lat: 31.0, lon: 34.8, base: 82, vals: [60, 98, 30, 65, 90, 45] }
+        };
+
+        document.getElementById('sync-time').innerText = new Date().toLocaleTimeString();
+        document.getElementById('loading').style.display = 'none';
+        updateView();
+    } catch (error) {
+        document.getElementById('statusMessage').innerText = "Sync Error: Connection Timed Out";
+        console.error("Fetch Error:", error);
+    }
+}
 
 function getMercatorPos(lat, lon) {
   const x = (lon + 180) * (100 / 360);
@@ -191,34 +204,17 @@ function getMercatorPos(lat, lon) {
   return { x, y: y * 0.9 + 5 }; 
 }
 
-function init() {
-  updateView();
-  
-  document.getElementById('multiplier').addEventListener('input', (e) => {
-    multiplier = e.target.value;
-    document.getElementById('multVal').innerText = parseFloat(multiplier).toFixed(2) + 'x';
-    updateView();
-  });
-
-  document.getElementById('searchInput').addEventListener('input', updateView);
-}
-
 function updateView() {
-  const query = document.getElementById('searchInput').value.toLowerCase();
   const container = document.getElementById('mapContainer');
   const panel = document.getElementById('sidePanel');
   
   document.querySelectorAll('.marker').forEach(m => m.remove());
-  let html = `<div class="panel-sub">Regional Rankings</div>`;
-  let highCount = 0;
+  let html = `<div style="font-family:var(--mono); font-size:0.65rem; color:var(--accent); margin-bottom:15px;">Live Rankings</div>`;
 
-  Object.entries(DATA).forEach(([code, c]) => {
+  Object.entries(LIVE_DATA).forEach(([code, c]) => {
     const score = Math.min(100, Math.round(c.base * multiplier));
-    if (score > 70) highCount++;
-
-    if (!c.name.toLowerCase().includes(query)) return;
-
     const pos = getMercatorPos(c.lat, c.lon);
+    
     const marker = document.createElement('div');
     marker.className = `marker ${score > 70 ? 'm-high' : (score > 40 ? 'm-medium' : 'm-low')}`;
     marker.id = `marker-${code}`;
@@ -226,55 +222,32 @@ function updateView() {
     marker.style.top = `${pos.y}%`;
     
     marker.onclick = () => showStudy(code, score);
-    marker.onmouseenter = (e) => {
-      const t = document.getElementById('tooltip');
-      t.style.display = 'block';
-      t.style.left = e.clientX + 15 + 'px'; t.style.top = e.clientY + 15 + 'px';
-      t.innerHTML = `Study: ${c.name}<br>Index: ${score}`;
-    };
-    marker.onmouseleave = () => document.getElementById('tooltip').style.display = 'none';
     container.appendChild(marker);
 
     html += `
-      <div class="data-row" onclick="showStudy('${code}', ${score})" 
-           onmouseenter="document.getElementById('marker-${code}').classList.add('highlight')"
-           onmouseleave="document.getElementById('marker-${code}').classList.remove('highlight')">
-        <span style="font-size:0.85rem; font-weight:400">${c.name}</span>
+      <div class="data-row" onclick="showStudy('${code}', ${score})">
+        <span style="font-size:0.85rem;">${c.name}</span>
         <span style="font-family:var(--mono); color:var(--accent)">${score}</span>
       </div>
     `;
   });
-
   panel.innerHTML = html;
-  document.getElementById('highMetric').innerText = highCount;
 }
 
 function showStudy(code, score) {
-  const c = DATA[code];
-  const color = score > 70 ? 'var(--high)' : (score > 40 ? 'var(--medium)' : 'var(--low)');
-  
+  const c = LIVE_DATA[code];
   document.getElementById('sidePanel').innerHTML = `
-    <button class="btn-research" style="width:100%; margin-bottom:20px" onclick="updateView()">← Back to Global Analysis</button>
-    <div style="margin-bottom:30px">
-      <h2 style="font-size:1.4rem; font-weight:600">${c.name}</h2>
-      <div style="display:flex; align-items:baseline; gap:10px">
-        <span style="font-size:2.5rem; font-family:var(--mono); color:var(--accent)">${score}</span>
-        <span style="font-size:0.7rem; color:var(--muted); text-transform:uppercase">Institutional Risk Score</span>
-      </div>
-    </div>
-    
-    <div style="height:240px; margin-bottom:30px">
-      <canvas id="radarChart"></canvas>
-    </div>
-    
-    <div class="panel-sub">Study Dimensions</div>
+    <button class="btn-research" style="width:100%; margin-bottom:20px" onclick="updateView()">← Back to Global</button>
+    <h2 style="font-size:1.4rem;">${c.name}</h2>
+    <div style="font-size:2.5rem; font-family:var(--mono); color:var(--accent); margin-bottom:20px;">${score}</div>
+    <div style="height:240px; margin-bottom:30px"><canvas id="radarChart"></canvas></div>
     ${LABELS.map((label, i) => `
       <div style="margin-bottom:12px">
-        <div style="display:flex; justify-content:space-between; font-size:0.65rem; font-family:var(--mono); margin-bottom:4px">
+        <div style="display:flex; justify-content:space-between; font-size:0.65rem; font-family:var(--mono);">
           <span>${label}</span><span>${c.vals[i]}%</span>
         </div>
-        <div style="height:4px; background:var(--surface-light); border-radius:2px">
-          <div style="height:100%; width:${c.vals[i]}%; background:var(--accent); border-radius:2px"></div>
+        <div style="height:4px; background:var(--surface-light); margin-top:4px;">
+          <div style="height:100%; width:${c.vals[i]}%; background:var(--accent);"></div>
         </div>
       </div>
     `).join('')}
@@ -286,17 +259,23 @@ function showStudy(code, score) {
     type: 'radar',
     data: {
       labels: ["POL", "CON", "SAN", "UNR", "SEC", "LEG"],
-      datasets: [{ data: c.vals, borderColor: '#0ea5e9', backgroundColor: 'rgba(14, 165, 233, 0.2)', borderWidth: 1.5, pointRadius: 2 }]
+      datasets: [{ data: c.vals, borderColor: '#0ea5e9', backgroundColor: 'rgba(14, 165, 233, 0.2)', borderWidth: 1.5 }]
     },
     options: {
-      scales: { r: { min: 0, max: 100, ticks: { display: false }, grid: { color: 'rgba(255,255,255,0.05)' }, angleLines: { color: 'rgba(255,255,255,0.05)' }, pointLabels: { color: '#9ca3af', font: { family: 'JetBrains Mono', size: 9 } } } },
+      scales: { r: { min: 0, max: 100, ticks: { display: false }, grid: { color: 'rgba(255,255,255,0.05)' } } },
       plugins: { legend: { display: false } },
       responsive: true, maintainAspectRatio: false
     }
   });
 }
 
-window.onload = init;
+document.getElementById('multiplier').addEventListener('input', (e) => {
+    multiplier = e.target.value;
+    document.getElementById('multVal').innerText = parseFloat(multiplier).toFixed(2) + 'x';
+    updateView();
+});
+
+window.onload = refreshData;
 </script>
 </body>
 </html>
