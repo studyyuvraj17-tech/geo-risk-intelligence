@@ -2,7 +2,7 @@ body {
   margin: 0;
   font-family: 'Inter', sans-serif;
   background: radial-gradient(circle at top, #0b0f1a, #020617);
-  color: #e5e7eb;
+  color: white;
 }
 
 /* HEADER */
@@ -14,24 +14,18 @@ body {
 .header h1 {
   font-family: 'Orbitron', sans-serif;
   font-size: 40px;
-  color: white;
 }
 
-.header p {
-  color: #9ca3af;
-}
-
-/* INSTRUCTION */
 .instruction {
   text-align: center;
-  color: #6b7280;
+  color: #9ca3af;
 }
 
 /* MAP */
 .map-container {
   position: relative;
   width: 1000px;
-  margin: 20px auto;
+  margin: auto;
 }
 
 #map {
@@ -45,99 +39,34 @@ body {
   height: 12px;
   border-radius: 50%;
   cursor: pointer;
-  animation: pulse 2s infinite;
-  transition: 0.2s;
-}
-
-.dot:hover {
-  transform: scale(1.8);
+  z-index: 10;
 }
 
 /* COLORS */
-.low {
-  background: #22c55e;
-  box-shadow: 0 0 12px #22c55e;
-}
-
-.medium {
-  background: #facc15;
-  box-shadow: 0 0 12px #facc15;
-}
-
-.high {
-  background: #ef4444;
-  box-shadow: 0 0 14px #ef4444;
-}
-
-/* PULSE */
-@keyframes pulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.5); }
-  100% { transform: scale(1); }
-}
-
-/* LEGEND */
-.legend {
-  text-align: center;
-  color: #9ca3af;
-}
-
-.low-box, .medium-box, .high-box {
-  display: inline-block;
-  width: 12px;
-  height: 12px;
-  margin: 0 5px;
-}
-
-.low-box { background: #22c55e; }
-.medium-box { background: #facc15; }
-.high-box { background: #ef4444; }
+.low { background: #22c55e; box-shadow: 0 0 10px #22c55e; }
+.medium { background: #facc15; box-shadow: 0 0 10px #facc15; }
+.high { background: #ef4444; box-shadow: 0 0 12px #ef4444; }
 
 /* PANEL */
 .panel {
   position: fixed;
-  right: -360px;
+  right: -350px;
   top: 0;
-  width: 340px;
+  width: 300px;
   height: 100%;
-  background: rgba(20,20,30,0.6);
-  backdrop-filter: blur(25px);
-  border-left: 1px solid rgba(255,255,255,0.1);
-  padding: 25px;
-  transition: all 0.4s ease;
+  background: rgba(20,20,30,0.7);
+  backdrop-filter: blur(20px);
+  padding: 20px;
+  transition: 0.4s;
 }
 
 .panel.active {
   right: 0;
 }
 
-/* TEXT */
-#country {
-  font-size: 26px;
-  color: white;
-}
-
-#risk {
-  color: #facc15;
-  font-weight: 600;
-}
-
-h4 {
-  margin-top: 20px;
-  color: #9ca3af;
-}
-
-#details p {
-  font-size: 14px;
-  color: #d1d5db;
-  margin: 6px 0;
-}
-
-/* CLOSE */
 .close-btn {
-  float: right;
   background: none;
   border: none;
-  color: #9ca3af;
+  color: white;
   cursor: pointer;
 }
