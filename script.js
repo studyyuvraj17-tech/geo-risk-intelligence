@@ -1,7 +1,7 @@
 const data = {
   India: {
     score: 42,
-    analysis: "India shows moderate geopolitical risk.",
+    analysis: "India shows moderate geopolitical risk with stable governance and rising economic pressures.",
     dimensions: {
       Stability: 38,
       Conflict: 45,
@@ -13,7 +13,7 @@ const data = {
 
   Pakistan: {
     score: 65,
-    analysis: "Pakistan faces instability.",
+    analysis: "Pakistan faces political instability and economic stress.",
     dimensions: {
       Stability: 65,
       Conflict: 70,
@@ -25,7 +25,7 @@ const data = {
 
   USA: {
     score: 48,
-    analysis: "USA faces global tensions.",
+    analysis: "USA faces internal polarization and global strategic tensions.",
     dimensions: {
       Stability: 45,
       Conflict: 60,
@@ -37,7 +37,7 @@ const data = {
 
   China: {
     score: 55,
-    analysis: "China shows strong governance.",
+    analysis: "China maintains strong governance but faces rising geopolitical tensions.",
     dimensions: {
       Stability: 30,
       Conflict: 65,
@@ -49,7 +49,7 @@ const data = {
 
   Russia: {
     score: 70,
-    analysis: "Russia faces high risk.",
+    analysis: "Russia faces high geopolitical risk due to ongoing conflicts and sanctions.",
     dimensions: {
       Stability: 40,
       Conflict: 90,
@@ -103,7 +103,6 @@ function drawRadarChart(dataObj) {
   ctx.clearRect(0, 0, 300, 300);
 
   const values = Object.values(dataObj);
-  const labels = Object.keys(dataObj);
   const centerX = 150;
   const centerY = 150;
   const radius = 100;
