@@ -3,18 +3,18 @@ body {
   font-family: 'Segoe UI', sans-serif;
   background: linear-gradient(135deg, #0b0f1a, #05070d);
   color: white;
+  text-align: center;
 }
 
 /* HEADER */
 header {
-  padding: 30px;
-  text-align: center;
+  padding: 25px;
   background: rgba(255,255,255,0.05);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid rgba(255,255,255,0.1);
 }
 
-/* MAP BUTTONS */
+/* MAP */
 .map button {
   margin: 10px;
   padding: 12px 22px;
@@ -46,22 +46,19 @@ header {
   display: none;
 }
 
-/* RISK SCORE */
+/* SCORE */
 .score-box {
   margin: 20px;
-  font-size: 20px;
+  font-size: 18px;
 }
 
 /* DIMENSIONS */
-.dimensions {
-  margin-top: 20px;
-}
-
 .dimension {
-  margin: 12px 0;
+  margin: 15px 0;
+  text-align: left;
 }
 
-/* PROGRESS BAR */
+/* BAR */
 .bar {
   height: 10px;
   background: rgba(255,255,255,0.1);
@@ -72,7 +69,6 @@ header {
 
 .fill {
   height: 100%;
-  width: 0;
   border-radius: 6px;
   transition: width 1s ease;
 }
