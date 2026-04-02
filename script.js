@@ -1,62 +1,48 @@
-const data = {
-  India: { values:[38,45,20,50,35,40], text:"Moderate risk" },
-  Pakistan: { values:[65,70,60,65,60,70], text:"High instability" },
-  USA: { values:[45,60,25,65,30,40], text:"Stable but tense" },
-  China: { values:[30,65,50,50,40,50], text:"Strong but tense" },
-  Russia: { values:[40,90,95,50,40,60], text:"High conflict risk" }
+const countries = {
+  India: { lat: 20.6, lon: 78.9, score: "Medium Risk" },
+  Pakistan: { lat: 30.3, lon: 69.3, score: "High Risk" },
+  USA: { lat: 37.1, lon: -95.7, score: "Medium Risk" },
+  China: { lat: 35.8, lon: 104.1, score: "Medium Risk" },
+  Russia: { lat: 61.5, lon: 105.3, score: "High Risk" }
 };
 
-const labels = [
-  "Political Instability",
-  "Armed Conflict",
-  "Economic Sanctions",
-  "Civil Unrest",
-  "Terrorism",
-  "Legal Risk"
-];
+const map = document.querySelector(".map-container");
 
-function showCountry(c){
-  const d = data[c];
+function createDots() {
+  const width = 1000;
+  const height = 500;
+
+  for (let name in countries) {
+    const c = countries[name];
+
+    const x = (c.lon + 180) * (width / 360);
+    const y = (90 - c.lat) * (height / 180);
+
+    const dot = document.createElement("div");
+    dot.className = "dot";
+    dot.style.left = x + "px";
+    dot.style.top = y + "px";
+
+    dot.title = name;
+
+    dot.onclick = () => showCountry(name);
+
+    map.appendChild(dot);
+  }
+}
+
+function showCountry(name) {
   const panel = document.getElementById("panel");
 
   panel.classList.add("active");
 
-  document.getElementById("country").innerText = c;
-  document.getElementById("analysis").innerText = d.text;
-
-  const avg = Math.round(d.values.reduce((a,b)=>a+b)/6);
-  document.getElementById("score").innerText = avg;
-
-  updateMeter(avg);
-
-  let html = "";
-  d.values.forEach((v,i)=>{
-    let color = v<34?"low":v<67?"medium":"high";
-
-    html += `
-      <div>
-        ${labels[i]}: ${v}
-        <div class="bar">
-          <div class="fill ${color}" style="width:${v}%"></div>
-        </div>
-      </div>
-    `;
-  });
-
-  document.getElementById("data").innerHTML = html;
+  document.getElementById("country").innerText = name;
+  document.getElementById("score").innerText =
+    countries[name].score;
 }
 
-function updateMeter(score){
-  const fill = document.getElementById("fill");
-  const label = document.getElementById("label");
-
-  fill.style.width = score+"%";
-
-  if(score<34){ fill.style.background="green"; label.innerText="Low"; }
-  else if(score<67){ fill.style.background="orange"; label.innerText="Medium"; }
-  else { fill.style.background="red"; label.innerText="High"; }
-}
-
-function closePanel(){
+function closePanel() {
   document.getElementById("panel").classList.remove("active");
 }
+
+createDots();
