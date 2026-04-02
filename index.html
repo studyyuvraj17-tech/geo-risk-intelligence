@@ -3,704 +3,438 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Geo Risk Intelligence</title>
+  <title>Geo Risk Intelligence | v2.2</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Exo+2:wght@300;400;600;700&display=swap" rel="stylesheet"/>
 
   <style>
     :root {
-      --bg:       #070b14;
-      --surface:  #0d1424;
-      --surface2: #111d30;
-      --border:   #1e3050;
-      --accent:   #00d4ff;
-      --low:      #22c55e;
-      --medium:   #f59e0b;
-      --high:     #ef4444;
-      --text:     #e2e8f0;
-      --muted:    #64748b;
-      --mono:     'Share Tech Mono', monospace;
-      --sans:     'Exo 2', sans-serif;
+      --bg: #05080f;
+      --surface: #0a111f;
+      --surface-light: #162235;
+      --border: #1e3050;
+      --accent: #00d4ff;
+      --low: #22c55e;
+      --medium: #f59e0b;
+      --high: #ef4444;
+      --text: #e2e8f0;
+      --muted: #64748b;
+      --mono: 'Share Tech Mono', monospace;
+      --sans: 'Exo 2', sans-serif;
     }
 
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
       font-family: var(--sans);
       background: var(--bg);
       color: var(--text);
-      min-height: 100vh;
-      overflow-x: hidden;
+      height: 100vh;
+      overflow: hidden; 
+      display: flex;
+      flex-direction: column;
     }
 
+    /* Grid Overlay */
     body::before {
       content: '';
       position: fixed; inset: 0;
-      background-image:
-        linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
-      background-size: 40px 40px;
+      background-image: linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
+      background-size: 50px 50px;
       pointer-events: none; z-index: 0;
     }
 
-    /* ── HEADER ── */
+    /* --- HEADER --- */
     header {
-      position: relative; z-index: 10;
-      display: flex; align-items: center;
-      justify-content: space-between;
-      padding: 14px 28px;
-      border-bottom: 1px solid var(--border);
-      background: rgba(7,11,20,0.9);
-      backdrop-filter: blur(8px);
-      flex-wrap: wrap; gap: 12px;
-    }
-
-    .logo { display: flex; align-items: center; gap: 12px; }
-
-    .logo-icon {
-      width: 36px; height: 36px;
-      border: 2px solid var(--accent); border-radius: 6px;
-      display: flex; align-items: center; justify-content: center;
-      font-family: var(--mono); font-size: 14px; color: var(--accent);
-      box-shadow: 0 0 12px rgba(0,212,255,0.3); flex-shrink: 0;
-    }
-
-    .logo-text h1 { font-size: 17px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
-    .logo-text span { font-size: 10px; color: var(--muted); font-family: var(--mono); letter-spacing: 0.12em; }
-
-    .header-right { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
-
-    .stat-chip {
-      font-family: var(--mono); font-size: 11px;
-      padding: 5px 11px; border: 1px solid var(--border);
-      border-radius: 4px; color: var(--muted); background: var(--surface);
-    }
-    .stat-chip b { color: var(--accent); }
-
-    .live-badge {
-      display: flex; align-items: center; gap: 7px;
-      font-family: var(--mono); font-size: 11px;
-      color: var(--low); letter-spacing: 0.1em;
-    }
-
-    .live-dot {
-      width: 7px; height: 7px; border-radius: 50%;
-      background: var(--low);
-      animation: blink 1.8s ease-in-out infinite;
-    }
-
-    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
-
-    /* ── TOOLBAR ── */
-    .toolbar {
-      position: relative; z-index: 5;
-      display: flex; align-items: center;
-      gap: 12px; padding: 12px 28px;
-      border-bottom: 1px solid var(--border);
-      background: rgba(13,20,36,0.8);
-      flex-wrap: wrap;
-    }
-
-    .search-wrap {
-      position: relative; flex: 1;
-      min-width: 180px; max-width: 280px;
-    }
-
-    .search-wrap svg {
-      position: absolute; left: 10px; top: 50%;
-      transform: translateY(-50%);
-      color: var(--muted); pointer-events: none;
-    }
-
-    #searchInput {
-      width: 100%;
-      background: var(--surface2);
-      border: 1px solid var(--border); border-radius: 5px;
-      padding: 7px 10px 7px 32px;
-      font-family: var(--mono); font-size: 12px;
-      color: var(--text); outline: none;
-      transition: border-color 0.2s;
-    }
-
-    #searchInput:focus { border-color: var(--accent); }
-    #searchInput::placeholder { color: var(--muted); }
-
-    .filter-group { display: flex; gap: 6px; }
-
-    .filter-btn {
-      font-family: var(--mono); font-size: 11px;
-      padding: 6px 14px;
-      border: 1px solid var(--border); border-radius: 4px;
-      background: var(--surface); color: var(--muted);
-      cursor: pointer; letter-spacing: 0.06em;
-      transition: all 0.18s;
-    }
-
-    .filter-btn:hover { border-color: var(--accent); color: var(--text); }
-    .filter-btn.active { background: var(--accent); border-color: var(--accent); color: #070b14; font-weight: 700; }
-    .filter-btn[data-f="low"].active    { background: var(--low);    border-color: var(--low);    color: #070b14; }
-    .filter-btn[data-f="medium"].active { background: var(--medium); border-color: var(--medium); color: #070b14; }
-    .filter-btn[data-f="high"].active   { background: var(--high);   border-color: var(--high);   color: #fff; }
-
-    .match-count { font-family: var(--mono); font-size: 11px; color: var(--muted); margin-left: auto; }
-
-    /* ── MAIN ── */
-    .main {
-      position: relative; z-index: 1;
-      display: flex; flex-direction: column;
-      align-items: center; padding: 20px 24px 60px;
-    }
-
-    .legend { display: flex; gap: 18px; margin-bottom: 14px; align-self: flex-end; }
-
-    .legend-item {
-      display: flex; align-items: center; gap: 6px;
-      font-size: 11px; color: var(--muted); font-family: var(--mono);
-    }
-
-    .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
-
-    /* ── MAP ── */
-    .map-wrapper {
-      position: relative; width: 100%; max-width: 1150px;
-      border: 1px solid var(--border); border-radius: 10px;
-      overflow: hidden;
-      box-shadow: 0 0 40px rgba(0,212,255,0.05);
-      background: #0a1628;
-    }
-
-    .map-wrapper img {
-      width: 100%; display: block;
-      filter: brightness(0.5) saturate(0.3) hue-rotate(185deg);
-      user-select: none; pointer-events: none;
-    }
-
-    /* ── DOTS ── */
-    .dot {
-      position: absolute; width: 11px; height: 11px;
-      border-radius: 50%; cursor: pointer;
-      transform: translate(-50%,-50%); z-index: 20;
-      transition: transform 0.15s, box-shadow 0.15s, opacity 0.25s;
-      border: 2px solid rgba(255,255,255,0.18);
-    }
-
-    .dot:hover { transform: translate(-50%,-50%) scale(1.65); z-index: 30; }
-    .dot.low    { background: var(--low);    box-shadow: 0 0 7px var(--low); }
-    .dot.medium { background: var(--medium); box-shadow: 0 0 7px var(--medium); }
-    .dot.high   { background: var(--high);   box-shadow: 0 0 7px var(--high); }
-    .dot.dimmed { opacity: 0.1; pointer-events: none; }
-    .dot.highlighted { transform: translate(-50%,-50%) scale(2) !important; z-index: 35; }
-
-    .dot.high::after {
-      content: ''; position: absolute; inset: -4px;
-      border-radius: 50%; border: 2px solid var(--high);
-      animation: pulse 1.5s ease-out infinite;
-    }
-
-    @keyframes pulse { 0%{transform:scale(1);opacity:.8} 100%{transform:scale(2.3);opacity:0} }
-
-    /* ── TOOLTIP ── */
-    .map-tooltip {
-      position: absolute;
-      background: rgba(7,11,20,0.95);
-      border: 1px solid var(--border); border-radius: 5px;
-      padding: 5px 11px; font-size: 11px; font-family: var(--mono);
-      color: var(--text); white-space: nowrap;
-      pointer-events: none; z-index: 50;
-      transform: translate(-50%,-140%); display: none;
-    }
-
-    /* ── PANEL ── */
-    .panel {
-      position: fixed; right: -390px; top: 0;
-      width: 370px; height: 100vh;
-      background: var(--surface);
-      border-left: 1px solid var(--border);
-      display: flex; flex-direction: column;
-      transition: right 0.38s cubic-bezier(0.4,0,0.2,1);
       z-index: 100;
-      box-shadow: -10px 0 40px rgba(0,0,0,0.5);
-      overflow: hidden;
-    }
-
-    .panel.open { right: 0; }
-
-    .panel-header {
-      padding: 18px 18px 14px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1rem 2rem;
+      background: rgba(5, 8, 15, 0.9);
+      backdrop-filter: blur(12px);
       border-bottom: 1px solid var(--border);
-      background: var(--surface2); flex-shrink: 0;
     }
 
-    .panel-top-row {
-      display: flex; justify-content: space-between;
-      align-items: flex-start; margin-bottom: 10px;
+    .logo-group { display: flex; align-items: center; gap: 15px; }
+    .logo-square {
+      width: 40px; height: 40px; border: 2px solid var(--accent);
+      display: grid; place-items: center; color: var(--accent);
+      font-family: var(--mono); font-weight: bold; border-radius: 4px;
+      box-shadow: 0 0 15px rgba(0, 212, 255, 0.2);
+    }
+    .logo-text h1 { font-size: 1.1rem; text-transform: uppercase; letter-spacing: 2px; }
+    .logo-text p { font-size: 0.65rem; color: var(--muted); font-family: var(--mono); }
+
+    .header-stats { display: flex; gap: 1rem; }
+    .stat-box {
+      background: var(--surface); border: 1px solid var(--border);
+      padding: 5px 12px; border-radius: 4px; font-family: var(--mono); font-size: 0.75rem;
+    }
+    .stat-box span { color: var(--accent); font-weight: bold; }
+
+    /* --- TOOLBAR --- */
+    .toolbar {
+      padding: 10px 2rem;
+      background: rgba(10, 17, 31, 0.6);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 20px; z-index: 90;
     }
 
-    .panel-title-group { display: flex; align-items: center; gap: 10px; }
+    .search-container { position: relative; width: 300px; }
+    #searchInput {
+      width: 100%; background: var(--surface-light); border: 1px solid var(--border);
+      color: white; padding: 8px 12px 8px 35px; border-radius: 4px;
+      font-family: var(--mono); font-size: 0.8rem;
+    }
+    .search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--muted); }
 
-    .country-flag {
-      width: 32px; height: 22px; border-radius: 3px;
-      object-fit: cover; border: 1px solid var(--border); flex-shrink: 0;
+    .filter-pills { display: flex; gap: 8px; }
+    .pill {
+      background: transparent; border: 1px solid var(--border); color: var(--muted);
+      padding: 4px 12px; border-radius: 20px; font-size: 0.7rem; cursor: pointer;
+      font-family: var(--mono); transition: 0.2s;
+    }
+    .pill.active { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+
+    /* --- MAIN LAYOUT --- */
+    .app-container {
+      flex: 1; display: flex; position: relative; overflow: hidden;
     }
 
-    .country-name { font-size: 21px; font-weight: 700; letter-spacing: 0.04em; line-height: 1; }
-    .country-meta { font-size: 10px; font-family: var(--mono); color: var(--muted); margin-top: 4px; letter-spacing: 0.1em; }
-
-    .close-btn {
-      background: none; border: 1px solid var(--border);
-      color: var(--muted); width: 28px; height: 28px;
-      border-radius: 4px; cursor: pointer; font-size: 14px;
-      display: flex; align-items: center; justify-content: center;
-      transition: border-color 0.2s, color 0.2s; flex-shrink: 0;
+    .map-area {
+      flex: 1; position: relative; display: flex; align-items: center; justify-content: center;
+      padding: 2rem; overflow: auto;
     }
 
-    .close-btn:hover { border-color: var(--high); color: var(--high); }
-
-    .badge-row { display: flex; align-items: center; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
-
-    .risk-badge {
-      display: inline-flex; align-items: center; gap: 7px;
-      padding: 5px 13px; border-radius: 5px;
-      font-family: var(--mono); font-size: 12px; font-weight: 600;
-      letter-spacing: 0.06em; border: 1px solid currentColor;
+    .map-container {
+      position: relative; width: 100%; max-width: 1200px;
+      background: #08101d; border-radius: 8px; border: 1px solid var(--border);
+      box-shadow: inset 0 0 50px rgba(0,0,0,0.5);
     }
 
-    .risk-badge::before { content:''; width:7px; height:7px; border-radius:50%; background:currentColor; }
-    .risk-badge.low    { color:var(--low);    background:rgba(34,197,94,0.1); }
-    .risk-badge.medium { color:var(--medium); background:rgba(245,158,11,0.1); }
-    .risk-badge.high   { color:var(--high);   background:rgba(239,68,68,0.1); }
-
-    .risk-score { font-size: 10px; opacity: 0.7; }
-
-    .trend-chip {
-      font-family: var(--mono); font-size: 11px;
-      padding: 4px 10px; border-radius: 4px;
-      border: 1px solid var(--border); white-space: nowrap;
+    .map-container img {
+      width: 100%; display: block; filter: brightness(0.6) saturate(0.5) hue-rotate(190deg);
+      pointer-events: none;
     }
 
-    .trend-chip.up   { color: var(--high);  background: rgba(239,68,68,0.08); border-color: rgba(239,68,68,0.3); }
-    .trend-chip.down { color: var(--low);   background: rgba(34,197,94,0.08); border-color: rgba(34,197,94,0.3); }
-    .trend-chip.flat { color: var(--muted); background: rgba(100,116,139,0.08); }
+    /* --- DOTS --- */
+    .dot {
+      position: absolute; width: 12px; height: 12px; border-radius: 50%;
+      transform: translate(-50%, -50%); cursor: pointer;
+      border: 2px solid rgba(255,255,255,0.3); transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .dot:hover { transform: translate(-50%, -50%) scale(1.8); z-index: 10; }
+    .dot.selected { transform: translate(-50%, -50%) scale(2.2); border-color: white; z-index: 11; box-shadow: 0 0 20px currentColor; }
+    
+    .dot-low { background: var(--low); color: var(--low); }
+    .dot-medium { background: var(--medium); color: var(--medium); }
+    .dot-high { background: var(--high); color: var(--high); }
+    
+    .dot-high::after {
+      content: ''; position: absolute; inset: -5px; border-radius: 50%;
+      border: 1px solid var(--high); animation: pulse 2s infinite;
+    }
+    @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(2.5); opacity: 0; } }
 
-    .panel-body {
-      flex: 1; overflow-y: auto; padding: 18px;
-      scrollbar-width: thin;
-      scrollbar-color: var(--border) transparent;
+    /* --- SIDE PANEL --- */
+    .side-panel {
+      width: 400px; background: var(--surface); border-left: 1px solid var(--border);
+      display: flex; flex-direction: column; transition: 0.4s; z-index: 200;
+      box-shadow: -10px 0 30px rgba(0,0,0,0.5);
     }
 
-    .panel-body::-webkit-scrollbar { width: 4px; }
-    .panel-body::-webkit-scrollbar-track { background: transparent; }
-    .panel-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-
-    .section-label {
-      font-family: var(--mono); font-size: 10px;
-      letter-spacing: 0.15em; color: var(--accent);
-      text-transform: uppercase; margin-bottom: 12px;
-      padding-bottom: 5px; border-bottom: 1px solid var(--border);
+    .panel-content { flex: 1; overflow-y: auto; padding: 1.5rem; }
+    
+    .empty-state {
+        height: 100%; display: flex; flex-direction: column; align-items: center;
+        justify-content: center; text-align: center; color: var(--muted);
     }
 
-    .chart-box { width: 100%; height: 220px; margin-bottom: 22px; }
+    .country-header { margin-bottom: 1.5rem; }
+    .country-header-top { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+    .flag-icon { width: 35px; height: 25px; border-radius: 2px; object-fit: cover; }
+    .risk-tag {
+        font-family: var(--mono); font-size: 0.7rem; padding: 2px 8px;
+        border-radius: 4px; border: 1px solid currentColor;
+    }
 
-    .breakdown { margin-bottom: 26px; }
-
-    .bar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 9px; }
-
-    .bar-label { width: 76px; font-size: 11px; font-family: var(--mono); color: var(--muted); flex-shrink: 0; }
-
-    .bar-track { flex: 1; height: 5px; background: var(--surface2); border-radius: 3px; overflow: hidden; }
-
-    .bar-fill { height: 100%; border-radius: 3px; transition: width 0.5s cubic-bezier(0.4,0,0.2,1); }
-
-    .bar-value { width: 26px; text-align: right; font-size: 11px; font-family: var(--mono); color: var(--text); flex-shrink: 0; }
-
-    .bar-trend { width: 16px; text-align: center; font-size: 13px; flex-shrink: 0; line-height: 1; }
-
-    .composite {
+    /* --- DATA VISUALS --- */
+    .score-card {
+      background: var(--surface-light); padding: 1.2rem; border-radius: 8px;
+      margin-bottom: 1.5rem; border: 1px solid var(--border);
       display: flex; justify-content: space-between; align-items: center;
-      padding: 13px 15px; background: var(--surface2);
-      border: 1px solid var(--border); border-radius: 8px; margin-bottom: 22px;
     }
+    .score-val { font-family: var(--mono); font-size: 2rem; font-weight: bold; color: var(--accent); }
+    
+    .chart-container { height: 250px; margin-bottom: 2rem; }
 
-    .composite-label { font-family: var(--mono); font-size: 11px; color: var(--muted); letter-spacing: 0.08em; }
+    .risk-list { display: flex; flex-direction: column; gap: 12px; }
+    .risk-item { display: grid; grid-template-columns: 80px 1fr 40px; align-items: center; gap: 10px; }
+    .risk-label { font-size: 0.75rem; font-family: var(--mono); color: var(--muted); }
+    .risk-bar-bg { height: 6px; background: #1a263d; border-radius: 3px; overflow: hidden; }
+    .risk-bar-fill { height: 100%; border-radius: 3px; transition: 0.8s; }
+    .risk-num { font-family: var(--mono); font-size: 0.75rem; text-align: right; }
 
-    .composite-value { font-family: var(--mono); font-size: 26px; font-weight: 700; }
-    .composite-value small { font-size: 12px; color: var(--muted); }
-
-    .panel-footer {
-      flex-shrink: 0; padding: 10px 18px;
-      border-top: 1px solid var(--border);
-      font-family: var(--mono); font-size: 10px;
-      color: var(--muted); letter-spacing: 0.07em;
-      background: var(--surface2);
+    /* Tooltip */
+    #mapTooltip {
+      position: absolute; background: var(--surface-light); border: 1px solid var(--accent);
+      padding: 5px 10px; border-radius: 4px; pointer-events: none;
+      font-family: var(--mono); font-size: 0.7rem; z-index: 1000; display: none;
     }
   </style>
 </head>
 <body>
 
-<!-- HEADER -->
 <header>
-  <div class="logo">
-    <div class="logo-icon">GR</div>
+  <div class="logo-group">
+    <div class="logo-square">GR</div>
     <div class="logo-text">
       <h1>Geo Risk Intelligence</h1>
-      <span>GLOBAL THREAT ASSESSMENT PLATFORM</span>
+      <p>Strategic Security Terminal</p>
     </div>
   </div>
-  <div class="header-right">
-    <div class="stat-chip">Monitored: <b id="countTotal">0</b></div>
-    <div class="stat-chip">High Risk: <b id="countHigh" style="color:var(--high)">0</b></div>
-    <div class="stat-chip">Medium: <b id="countMed" style="color:var(--medium)">0</b></div>
-    <div class="live-badge"><div class="live-dot"></div>STATIC DATA</div>
+  <div class="header-stats">
+    <div class="stat-box">MONITORED: <span id="statTotal">0</span></div>
+    <div class="stat-box">CRITICAL: <span id="statHigh" style="color:var(--high)">0</span></div>
   </div>
 </header>
 
-<!-- TOOLBAR -->
 <div class="toolbar">
-  <div class="search-wrap">
-    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-      <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-    </svg>
-    <input id="searchInput" type="text" placeholder="Search country…" autocomplete="off"/>
+  <div class="search-container">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="searchInput" placeholder="SEARCH SYSTEM...">
   </div>
-  <div class="filter-group">
-    <button class="filter-btn active" data-f="all">ALL</button>
-    <button class="filter-btn" data-f="low">LOW</button>
-    <button class="filter-btn" data-f="medium">MEDIUM</button>
-    <button class="filter-btn" data-f="high">HIGH</button>
-  </div>
-  <span class="match-count" id="matchCount"></span>
-</div>
-
-<!-- MAIN -->
-<div class="main">
-  <div class="legend">
-    <div class="legend-item"><div class="legend-dot" style="background:var(--low)"></div>Low</div>
-    <div class="legend-item"><div class="legend-dot" style="background:var(--medium)"></div>Medium</div>
-    <div class="legend-item"><div class="legend-dot" style="background:var(--high)"></div>High</div>
-  </div>
-
-  <div class="map-wrapper" id="mapWrapper">
-    <img id="mapImg"
-      src="https://upload.wikimedia.org/wikipedia/commons/8/80/World_map_-_low_resolution.svg"
-      alt="World Map" draggable="false"/>
-    <div id="mapTooltip" class="map-tooltip"></div>
+  <div class="filter-pills">
+    <button class="pill active" data-filter="all">ALL</button>
+    <button class="pill" data-filter="high">HIGH RISK</button>
+    <button class="pill" data-filter="medium">MID RISK</button>
+    <button class="pill" data-filter="low">STABLE</button>
   </div>
 </div>
 
-<!-- PANEL -->
-<div class="panel" id="panel">
-  <div class="panel-header">
-    <div class="panel-top-row">
-      <div class="panel-title-group">
-        <img id="countryFlag" class="country-flag" src="" alt=""
-          onerror="this.style.display='none'"/>
-        <div>
-          <div class="country-name" id="panelCountry">—</div>
-          <div class="country-meta" id="panelMeta">SELECT A COUNTRY</div>
-        </div>
+<div class="app-container">
+  <main class="map-area">
+    <div class="map-container" id="mapContainer">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/8/80/World_map_-_low_resolution.svg" id="worldMap">
       </div>
-      <button class="close-btn" id="closeBtn">✕</button>
+    <div id="mapTooltip"></div>
+  </main>
+
+  <aside class="side-panel">
+    <div class="panel-content" id="panelContent">
+      <div class="empty-state">
+        <p>TERMINAL STANDBY</p>
+        <p style="font-size: 0.7rem; margin-top: 10px;">Select a region to initiate scan</p>
+      </div>
     </div>
-    <div class="badge-row">
-      <span class="risk-badge" id="riskBadge">—</span>
-      <span class="trend-chip" id="trendChip"></span>
-    </div>
-  </div>
-
-  <div class="panel-body">
-    <div class="composite">
-      <div class="composite-label">COMPOSITE RISK SCORE</div>
-      <div class="composite-value" id="compositeScore">—<small>/100</small></div>
-    </div>
-
-    <div class="section-label">Threat Radar</div>
-    <div class="chart-box"><canvas id="radarChart"></canvas></div>
-
-    <div class="section-label">Risk Breakdown</div>
-    <div class="breakdown" id="breakdown"></div>
-  </div>
-
-  <div class="panel-footer">DATA SOURCE: STATIC DEMO — v2.0 &nbsp;|&nbsp; 2025-Q2</div>
+  </aside>
 </div>
 
 <script>
-// ─── DATA ────────────────────────────────────────────────────────────────────
-// values:  [Political, Conflict, Sanctions, Unrest, Terrorism, Legal]
-// trends:  per-dimension — "up" | "down" | "flat"
-// code:    ISO 3166-1 alpha-2 for flag
+// --- CONFIGURATION ---
+const DIMENSIONS = ["Political", "Conflict", "Sanctions", "Unrest", "Terrorism", "Legal"];
 
-const LABELS = ["Political","Conflict","Sanctions","Unrest","Terrorism","Legal"];
-
-const COUNTRIES = {
-  // ── HIGH RISK ──
-  Ukraine:     { lat:48.4,  lon:31.2,    code:"ua", values:[80,95,70,75,55,65], trends:["up","up","up","up","flat","up"] },
-  Syria:       { lat:34.8,  lon:38.9,    code:"sy", values:[90,88,80,82,78,85], trends:["flat","down","flat","down","flat","flat"] },
-  Sudan:       { lat:12.8,  lon:30.2,    code:"sd", values:[85,90,50,88,70,80], trends:["up","up","flat","up","up","flat"] },
-  Afghanistan: { lat:33.9,  lon:67.7,    code:"af", values:[88,85,75,80,90,88], trends:["flat","flat","flat","flat","flat","flat"] },
-  Iran:        { lat:32.4,  lon:53.7,    code:"ir", values:[60,65,90,70,50,75], trends:["up","flat","up","up","flat","flat"] },
-  Pakistan:    { lat:30.3,  lon:69.3,    code:"pk", values:[65,70,60,65,60,70], trends:["up","up","flat","up","flat","up"] },
-  Nigeria:     { lat:9.1,   lon:8.7,     code:"ng", values:[70,75,15,70,65,68], trends:["up","up","flat","up","up","flat"] },
-  Myanmar:     { lat:21.9,  lon:95.9,    code:"mm", values:[85,88,70,82,65,80], trends:["up","up","up","up","flat","up"] },
-  Venezuela:   { lat:6.4,   lon:-66.5,   code:"ve", values:[78,55,85,80,60,82], trends:["up","flat","up","up","flat","up"] },
-  NorthKorea:  { lat:40.3,  lon:127.5,   code:"kp", values:[70,60,98,50,30,90], trends:["flat","flat","up","flat","flat","flat"] },
-  Yemen:       { lat:15.6,  lon:48.5,    code:"ye", values:[88,92,55,85,75,82], trends:["flat","flat","flat","flat","flat","flat"] },
-  Somalia:     { lat:5.2,   lon:46.2,    code:"so", values:[90,88,40,85,88,88], trends:["flat","flat","flat","flat","flat","flat"] },
-  Haiti:       { lat:18.9,  lon:-72.3,   code:"ht", values:[82,78,30,88,80,80], trends:["up","up","flat","up","up","flat"] },
-
-  // ── MEDIUM RISK ──
-  Russia:      { lat:61.5,  lon:105.3,   code:"ru", values:[40,90,95,50,40,60], trends:["flat","up","up","flat","flat","flat"] },
-  China:       { lat:35.8,  lon:104.1,   code:"cn", values:[30,65,50,50,40,50], trends:["flat","up","up","flat","flat","up"] },
-  USA:         { lat:37.1,  lon:-95.7,   code:"us", values:[45,60,25,65,30,40], trends:["up","flat","flat","up","flat","flat"] },
-  India:       { lat:20.6,  lon:78.9,    code:"in", values:[38,45,20,50,35,40], trends:["flat","flat","flat","up","down","flat"] },
-  Brazil:      { lat:-14.2, lon:-51.9,   code:"br", values:[55,50,10,60,55,50], trends:["up","flat","flat","up","up","flat"] },
-  Mexico:      { lat:23.6,  lon:-102.5,  code:"mx", values:[60,58,10,62,70,60], trends:["up","up","flat","up","up","flat"] },
-  Colombia:    { lat:4.6,   lon:-74.1,   code:"co", values:[55,60,10,58,65,55], trends:["down","down","flat","down","down","flat"] },
-  Ethiopia:    { lat:9.1,   lon:40.5,    code:"et", values:[72,78,20,74,60,65], trends:["down","down","flat","down","flat","flat"] },
-  Iraq:        { lat:33.2,  lon:43.7,    code:"iq", values:[68,65,40,65,70,70], trends:["down","down","flat","down","down","flat"] },
-  Libya:       { lat:26.3,  lon:17.2,    code:"ly", values:[75,72,35,72,68,75], trends:["flat","flat","flat","flat","flat","flat"] },
-  Turkey:      { lat:38.9,  lon:35.2,    code:"tr", values:[55,50,30,58,48,55], trends:["up","flat","up","up","flat","up"] },
-  SaudiArabia: { lat:23.9,  lon:45.1,    code:"sa", values:[40,45,20,38,40,45], trends:["flat","up","flat","flat","flat","flat"] },
-  SouthAfrica: { lat:-30.6, lon:22.9,    code:"za", values:[55,45,10,62,50,52], trends:["up","flat","flat","up","flat","flat"] },
-  Egypt:       { lat:26.8,  lon:30.8,    code:"eg", values:[50,42,20,55,45,55], trends:["flat","flat","flat","flat","flat","flat"] },
-
-  // ── LOW RISK ──
-  Germany:     { lat:51.2,  lon:10.4,    code:"de", values:[20,15,10,25,15,15], trends:["flat","flat","flat","flat","flat","flat"] },
-  France:      { lat:46.2,  lon:2.2,     code:"fr", values:[28,18,8,32,28,18],  trends:["flat","flat","flat","up","flat","flat"] },
-  UK:          { lat:55.4,  lon:-3.4,    code:"gb", values:[30,20,10,35,22,20], trends:["flat","flat","flat","up","flat","flat"] },
-  Japan:       { lat:36.2,  lon:138.2,   code:"jp", values:[18,15,10,15,10,15], trends:["flat","flat","flat","flat","flat","flat"] },
-  Australia:   { lat:-25.3, lon:133.8,   code:"au", values:[15,12,8,18,10,12],  trends:["flat","flat","flat","flat","flat","flat"] },
-  Canada:      { lat:56.1,  lon:-106.3,  code:"ca", values:[22,14,8,25,12,14],  trends:["flat","flat","flat","flat","flat","flat"] },
-  Norway:      { lat:60.5,  lon:8.5,     code:"no", values:[10,8,5,12,8,8],     trends:["flat","flat","flat","flat","flat","flat"] },
+const DATA = {
+  "UA": { name: "Ukraine", lat: 48.4, lon: 31.2, vals: [85, 98, 70, 75, 60, 65], trend: "up" },
+  "SY": { name: "Syria", lat: 34.8, lon: 38.9, vals: [92, 90, 85, 80, 85, 88], trend: "stable" },
+  "AF": { name: "Afghanistan", lat: 33.9, lon: 67.7, vals: [90, 85, 80, 75, 95, 90], trend: "stable" },
+  "RU": { name: "Russia", lat: 61.5, lon: 105.3, vals: [50, 95, 98, 45, 40, 70], trend: "up" },
+  "US": { name: "United States", lat: 37.1, lon: -95.7, vals: [40, 30, 10, 55, 35, 25], trend: "up" },
+  "IN": { name: "India", lat: 20.6, lon: 78.9, vals: [35, 40, 15, 50, 45, 40], trend: "stable" },
+  "CN": { name: "China", lat: 35.8, lon: 104.1, vals: [30, 50, 60, 40, 30, 60], trend: "up" },
+  "BR": { name: "Brazil", lat: -14.2, lon: -51.9, vals: [50, 40, 10, 65, 20, 55], trend: "stable" },
+  "MX": { name: "Mexico", lat: 23.6, lon: -102.5, vals: [65, 75, 10, 60, 80, 70], trend: "up" },
+  "GB": { name: "United Kingdom", lat: 55.4, lon: -3.4, vals: [25, 15, 10, 40, 35, 20], trend: "stable" }
 };
 
-// ─── HELPERS ─────────────────────────────────────────────────────────────────
-const avg = arr => Math.round(arr.reduce((a,b)=>a+b,0)/arr.length);
-const riskClass = s => s<34?"low":s<67?"medium":"high";
-const riskLabel = s => s<34?"LOW RISK":s<67?"MEDIUM RISK":"HIGH RISK";
-const barColor  = v => v<34?"var(--low)":v<67?"var(--medium)":"var(--high)";
-
-function trendArrow(t){
-  if(t==="up")   return { arrow:"↑", cls:"up",   color:"var(--high)" };
-  if(t==="down") return { arrow:"↓", cls:"down", color:"var(--low)" };
-  return                { arrow:"→", cls:"flat", color:"var(--muted)" };
-}
-
-function overallTrend(trends){
-  const ups   = trends.filter(t=>t==="up").length;
-  const downs = trends.filter(t=>t==="down").length;
-  if(ups > downs+1)   return "up";
-  if(downs > ups+1)   return "down";
-  return "flat";
-}
-
-// ─── STATS ───────────────────────────────────────────────────────────────────
-function updateHeaderStats(list){
-  list = list || Object.values(COUNTRIES);
-  document.getElementById("countTotal").textContent = list.length;
-  document.getElementById("countHigh").textContent  = list.filter(c=>riskClass(avg(c.values))==="high").length;
-  document.getElementById("countMed").textContent   = list.filter(c=>riskClass(avg(c.values))==="medium").length;
-}
-
-// ─── FILTER STATE ────────────────────────────────────────────────────────────
-let activeFilter = "all";
-let searchQuery  = "";
-
-function getVisible(){
-  return Object.entries(COUNTRIES).filter(([name, data])=>{
-    const mf = activeFilter==="all" || riskClass(avg(data.values))===activeFilter;
-    const ms = name.toLowerCase().includes(searchQuery.toLowerCase());
-    return mf && ms;
-  });
-}
-
-function applyFilters(){
-  const visible     = getVisible();
-  const visibleNames = new Set(visible.map(([n])=>n));
-
-  document.querySelectorAll(".dot").forEach(dot=>{
-    const inView = visibleNames.has(dot.dataset.name);
-    dot.classList.toggle("dimmed", !inView);
-    dot.style.pointerEvents = inView ? "" : "none";
-    dot.classList.remove("highlighted");
-    if(searchQuery && dot.dataset.name.toLowerCase()===searchQuery.toLowerCase()){
-      dot.classList.add("highlighted");
-    }
-  });
-
-  const mc = document.getElementById("matchCount");
-  mc.textContent = visible.length < Object.keys(COUNTRIES).length ? `${visible.length} shown` : "";
-  updateHeaderStats(visible.map(([,d])=>d));
-}
-
-// ─── TOOLBAR EVENTS ──────────────────────────────────────────────────────────
-document.querySelectorAll(".filter-btn").forEach(btn=>{
-  btn.addEventListener("click", ()=>{
-    document.querySelectorAll(".filter-btn").forEach(b=>b.classList.remove("active"));
-    btn.classList.add("active");
-    activeFilter = btn.dataset.f;
-    applyFilters();
-  });
-});
-
-document.getElementById("searchInput").addEventListener("input", e=>{
-  searchQuery = e.target.value.trim();
-  applyFilters();
-});
-
-// ─── MAP DOTS ────────────────────────────────────────────────────────────────
-function latlonToXY(lat, lon, w, h){
-  return { x:(lon+180)*(w/360), y:(90-lat)*(h/180) };
-}
-
-function createDots(){
-  document.querySelectorAll(".dot").forEach(d=>d.remove());
-
-  const wrapper = document.getElementById("mapWrapper");
-  const img     = document.getElementById("mapImg");
-  const tooltip = document.getElementById("mapTooltip");
-  const w = img.clientWidth, h = img.clientHeight;
-
-  for(const [name, data] of Object.entries(COUNTRIES)){
-    const score = avg(data.values);
-    const cls   = riskClass(score);
-    const {x,y} = latlonToXY(data.lat, data.lon, w, h);
-
-    const dot = document.createElement("div");
-    dot.className = `dot ${cls}`;
-    dot.style.left = x+"px";
-    dot.style.top  = y+"px";
-    dot.dataset.name = name;
-
-    dot.addEventListener("mouseenter", ()=>{
-      tooltip.textContent = `${name}  ·  ${riskLabel(score)}`;
-      tooltip.style.left  = x+"px";
-      tooltip.style.top   = y+"px";
-      tooltip.style.display = "block";
-    });
-    dot.addEventListener("mouseleave", ()=>{ tooltip.style.display="none"; });
-    dot.addEventListener("click", ()=>{ tooltip.style.display="none"; openPanel(name); });
-
-    wrapper.appendChild(dot);
-  }
-
-  applyFilters();
-}
-
-window.addEventListener("resize", ()=>{
-  clearTimeout(window._rt);
-  window._rt = setTimeout(createDots, 150);
-});
-
-// ─── RADAR ───────────────────────────────────────────────────────────────────
+// --- CORE LOGIC ---
 let radarChart = null;
+let currentSelection = null;
 
-// ─── OPEN PANEL ──────────────────────────────────────────────────────────────
-function openPanel(name){
-  const data  = COUNTRIES[name];
-  const score = avg(data.values);
-  const cls   = riskClass(score);
-  const ot    = overallTrend(data.trends);
+// Map Calibration: Adjust these if you ever change the background map image.
+// The current values account for standard map cropping (no Antarctica).
+const MAP_BOUNDS = {
+  top: 85,     // Northernmost latitude visible
+  bottom: -60, // Southernmost latitude visible
+  left: -180,  // Westernmost longitude
+  right: 180   // Easternmost longitude
+};
 
-  // Flag
-  const flagEl = document.getElementById("countryFlag");
-  flagEl.style.display = "inline-block";
-  flagEl.src = `https://flagcdn.com/w40/${data.code}.png`;
+// Convert Lat/Lon to CSS Percentages
+function latLonToPercent(lat, lon) {
+  const x = ((lon - MAP_BOUNDS.left) / (MAP_BOUNDS.right - MAP_BOUNDS.left)) * 100;
+  const y = ((MAP_BOUNDS.top - lat) / (MAP_BOUNDS.top - MAP_BOUNDS.bottom)) * 100;
+  return { x, y };
+}
 
-  // Name / meta
-  document.getElementById("panelCountry").textContent = name;
-  document.getElementById("panelMeta").textContent =
-    `ISO: ${data.code.toUpperCase()}  ·  COMPOSITE: ${score}/100`;
+const getRiskLevel = (score) => {
+  if (score > 70) return { label: 'HIGH', class: 'dot-high', color: 'var(--high)' };
+  if (score > 40) return { label: 'MEDIUM', class: 'dot-medium', color: 'var(--medium)' };
+  return { label: 'LOW', class: 'dot-low', color: 'var(--low)' };
+};
 
-  // Risk badge
-  const badge = document.getElementById("riskBadge");
-  badge.className = `risk-badge ${cls}`;
-  badge.innerHTML = `${riskLabel(score)} <span class="risk-score">&nbsp;AVG ${score}</span>`;
+const calcAvg = (vals) => Math.round(vals.reduce((a, b) => a + b, 0) / vals.length);
 
-  // Trend chip
-  const chip = document.getElementById("trendChip");
-  const {arrow, cls:tc} = trendArrow(ot);
-  chip.className = `trend-chip ${tc}`;
-  chip.textContent = `${arrow} ${ot==="up"?"RISING":ot==="down"?"FALLING":"STABLE"}`;
+function init() {
+  renderDots();
+  updateStats();
+  
+  // Events
+  document.getElementById('searchInput').addEventListener('input', handleFilter);
+  document.querySelectorAll('.pill').forEach(p => p.addEventListener('click', e => {
+    document.querySelectorAll('.pill').forEach(b => b.classList.remove('active'));
+    e.target.classList.add('active');
+    handleFilter();
+  }));
+}
 
-  // Composite score
-  const comp = document.getElementById("compositeScore");
-  comp.style.color = cls==="low"?"var(--low)":cls==="medium"?"var(--medium)":"var(--high)";
-  comp.innerHTML = `${score}<small>/100</small>`;
+function updateStats() {
+  const all = Object.values(DATA);
+  document.getElementById('statTotal').innerText = all.length;
+  document.getElementById('statHigh').innerText = all.filter(c => calcAvg(c.vals) > 70).length;
+}
 
-  // Radar chart
-  if(radarChart) radarChart.destroy();
-  radarChart = new Chart(document.getElementById("radarChart"),{
-    type:"radar",
-    data:{
-      labels: LABELS,
-      datasets:[{
-        data: data.values,
-        borderColor:"rgba(0,212,255,0.9)",
-        backgroundColor:"rgba(0,212,255,0.07)",
-        borderWidth:2,
-        pointBackgroundColor:"rgba(0,212,255,0.9)",
-        pointBorderColor:"transparent",
-        pointRadius:4,
+function renderDots() {
+  const container = document.getElementById('mapContainer');
+  
+  // Clear existing dots
+  document.querySelectorAll('.dot').forEach(d => d.remove());
+
+  Object.entries(DATA).forEach(([code, country]) => {
+    const avg = calcAvg(country.vals);
+    const risk = getRiskLevel(avg);
+    
+    const dot = document.createElement('div');
+    dot.className = `dot ${risk.class}`;
+    dot.dataset.code = code;
+    
+    // Position using percentages (fully responsive)
+    const pos = latLonToPercent(country.lat, country.lon);
+    dot.style.left = `${pos.x}%`;
+    dot.style.top = `${pos.y}%`;
+
+    dot.addEventListener('mouseenter', (e) => showTooltip(e, country.name, avg));
+    dot.addEventListener('mouseleave', hideTooltip);
+    dot.addEventListener('click', () => selectCountry(code));
+
+    container.appendChild(dot);
+  });
+}
+
+function handleFilter() {
+  const query = document.getElementById('searchInput').value.toLowerCase();
+  const filter = document.querySelector('.pill.active').dataset.filter;
+
+  document.querySelectorAll('.dot').forEach(dot => {
+    const country = DATA[dot.dataset.code];
+    const score = calcAvg(country.vals);
+    const risk = getRiskLevel(score).label.toLowerCase();
+
+    const matchesSearch = country.name.toLowerCase().includes(query);
+    const matchesPill = filter === 'all' || 
+                        (filter === 'high' && risk === 'high') ||
+                        (filter === 'medium' && risk === 'medium') ||
+                        (filter === 'low' && risk === 'low');
+
+    dot.style.display = (matchesSearch && matchesPill) ? 'block' : 'none';
+  });
+}
+
+function selectCountry(code) {
+  currentSelection = code;
+  const country = DATA[code];
+  const score = calcAvg(country.vals);
+  const risk = getRiskLevel(score);
+
+  // Update Visuals
+  document.querySelectorAll('.dot').forEach(d => d.classList.remove('selected'));
+  document.querySelector(`[data-code="${code}"]`).classList.add('selected');
+
+  const content = document.getElementById('panelContent');
+  content.innerHTML = `
+    <div class="country-header">
+      <div class="country-header-top">
+        <img src="https://flagcdn.com/w80/${code.toLowerCase()}.png" class="flag-icon">
+        <h2 style="font-size:1.5rem">${country.name}</h2>
+      </div>
+      <span class="risk-tag" style="color:${risk.color}">${risk.label} THREAT LEVEL</span>
+    </div>
+
+    <div class="score-card">
+      <div>
+        <p style="font-size:0.6rem; color:var(--muted); font-family:var(--mono)">COMPOSITE RISK INDEX</p>
+        <p class="score-val">${score}<span style="font-size:0.8rem; opacity:0.5">/100</span></p>
+      </div>
+      <div style="text-align:right">
+         <p style="font-size:0.7rem; color:${country.trend === 'up' ? 'var(--high)' : 'var(--low)'}">
+            ${country.trend === 'up' ? '▲ RISING' : '● STABLE'}
+         </p>
+      </div>
+    </div>
+
+    <div class="chart-container"><canvas id="radarChart"></canvas></div>
+
+    <div class="risk-list">
+      ${DIMENSIONS.map((dim, i) => `
+        <div class="risk-item">
+          <span class="risk-label">${dim}</span>
+          <div class="risk-bar-bg">
+            <div class="risk-bar-fill" style="width:${country.vals[i]}%; background:${getRiskLevel(country.vals[i]).color}"></div>
+          </div>
+          <span class="risk-num">${country.vals[i]}</span>
+        </div>
+      `).join('')}
+    </div>
+  `;
+
+  renderChart(country.vals);
+}
+
+function renderChart(vals) {
+  if (radarChart) radarChart.destroy();
+  const ctx = document.getElementById('radarChart').getContext('2d');
+  
+  radarChart = new Chart(ctx, {
+    type: 'radar',
+    data: {
+      labels: DIMENSIONS,
+      datasets: [{
+        data: vals,
+        backgroundColor: 'rgba(0, 212, 255, 0.1)',
+        borderColor: '#00d4ff',
+        borderWidth: 2,
+        pointBackgroundColor: '#00d4ff'
       }]
     },
-    options:{
-      responsive:true, maintainAspectRatio:false,
-      animation:{duration:450},
-      plugins:{
-        legend:{display:false},
-        tooltip:{ callbacks:{ label: ctx=>` ${ctx.label}: ${ctx.raw}` } }
-      },
-      scales:{
-        r:{
-          min:0, max:100,
-          ticks:{display:false, stepSize:25},
-          grid:{color:"rgba(30,48,80,0.9)"},
-          angleLines:{color:"rgba(30,48,80,0.9)"},
-          pointLabels:{
-            color:"#64748b",
-            font:{family:"'Share Tech Mono'", size:10}
-          }
+    options: {
+      scales: {
+        r: {
+          min: 0, max: 100, beginAtZero: true,
+          grid: { color: '#1e3050' },
+          angleLines: { color: '#1e3050' },
+          ticks: { display: false },
+          pointLabels: { color: '#64748b', font: { family: 'Share Tech Mono', size: 10 } }
         }
-      }
+      },
+      plugins: { legend: { display: false } },
+      responsive: true,
+      maintainAspectRatio: false
     }
   });
-
-  // Breakdown bars + trend arrows
-  let html = "";
-  data.values.forEach((v,i)=>{
-    const {arrow:a, color:c} = trendArrow(data.trends[i]);
-    html += `
-      <div class="bar-row">
-        <div class="bar-label">${LABELS[i]}</div>
-        <div class="bar-track">
-          <div class="bar-fill" style="width:${v}%;background:${barColor(v)}"></div>
-        </div>
-        <div class="bar-value">${v}</div>
-        <div class="bar-trend" style="color:${c}">${a}</div>
-      </div>`;
-  });
-  document.getElementById("breakdown").innerHTML = html;
-
-  document.getElementById("panel").classList.add("open");
 }
 
-// ─── CLOSE ───────────────────────────────────────────────────────────────────
-document.getElementById("closeBtn").addEventListener("click",()=>{
-  document.getElementById("panel").classList.remove("open");
-});
+function showTooltip(e, name, score) {
+  const t = document.getElementById('mapTooltip');
+  t.innerHTML = `${name} <span style="color:var(--accent)">${score}</span>`;
+  t.style.display = 'block';
+  t.style.left = (e.pageX + 15) + 'px';
+  t.style.top = (e.pageY - 15) + 'px';
+}
 
-document.addEventListener("click", e=>{
-  const panel = document.getElementById("panel");
-  if(!panel.contains(e.target) && !e.target.classList.contains("dot")){
-    panel.classList.remove("open");
-  }
-});
+function hideTooltip() { document.getElementById('mapTooltip').style.display = 'none'; }
 
-// ─── INIT ─────────────────────────────────────────────────────────────────────
-updateHeaderStats();
-const mapImg = document.getElementById("mapImg");
-if(mapImg.complete){ createDots(); }
-else { mapImg.addEventListener("load", createDots); }
+// Start
+window.onload = init;
+
 </script>
 </body>
 </html>
