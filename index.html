@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Geo Risk Intelligence | Global Command</title>
+  <title>Geo Risk Intelligence | Global Terminal</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Exo+2:wght@300;400;600;700&display=swap" rel="stylesheet"/>
 
@@ -26,10 +26,17 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: var(--sans); background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
 
+    /* Grid Overlay */
+    body::before {
+      content: ''; position: fixed; inset: 0;
+      background-image: linear-gradient(rgba(0,212,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(0,212,255,0.02) 1px, transparent 1px);
+      background-size: 40px 40px; pointer-events: none; z-index: 0;
+    }
+
     /* --- HEADER --- */
     header {
       z-index: 100; display: flex; align-items: center; justify-content: space-between;
-      padding: 0.8rem 2rem; background: rgba(2, 4, 8, 0.95); border-bottom: 1px solid var(--border);
+      padding: 0.8rem 2rem; background: rgba(2, 4, 8, 0.95); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border);
     }
     .logo-group { display: flex; align-items: center; gap: 12px; }
     .logo-box { width: 35px; height: 35px; border: 2px solid var(--accent); display: grid; place-items: center; color: var(--accent); font-family: var(--mono); font-weight: bold; border-radius: 4px; box-shadow: 0 0 15px rgba(0, 212, 255, 0.2); }
@@ -40,26 +47,34 @@
     .stat-label { font-size: 0.6rem; color: var(--muted); text-transform: uppercase; }
     .stat-value { font-size: 0.9rem; font-weight: bold; color: var(--accent); }
 
+    /* --- TOOLBAR --- */
+    .toolbar { padding: 10px 2rem; background: rgba(10, 17, 31, 0.8); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 20px; z-index: 90; }
+    .search-container { position: relative; width: 300px; }
+    #searchInput { width: 100%; background: var(--surface-light); border: 1px solid var(--border); color: white; padding: 8px 12px 8px 35px; border-radius: 4px; font-family: var(--mono); font-size: 0.8rem; outline: none; transition: 0.2s; }
+    .search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--muted); }
+    .filter-pills { display: flex; gap: 8px; }
+    .pill { background: transparent; border: 1px solid var(--border); color: var(--muted); padding: 5px 14px; border-radius: 20px; font-size: 0.7rem; cursor: pointer; font-family: var(--mono); transition: 0.2s; }
+    .pill.active { background: var(--accent); color: var(--bg); border-color: var(--accent); font-weight: bold; }
+
     /* --- MAIN LAYOUT --- */
     .app-container { flex: 1; display: flex; position: relative; overflow: hidden; }
+    .map-area { flex: 1; position: relative; display: flex; align-items: center; justify-content: center; padding: 1rem; background: #050a14; }
+    .map-container { position: relative; width: 100%; height: 100%; max-width: 1100px; display: flex; align-items: center; justify-content: center; }
     
-    .map-area { flex: 1; position: relative; display: flex; align-items: center; justify-content: center; background: #050a14; min-height: 500px; }
-    .map-container { position: relative; width: 95%; max-width: 1100px; }
-    
-    /* Reliable Map Styling */
+    /* Optimized Map Styling */
     .map-container img { 
         width: 100%; height: auto; display: block; 
-        filter: brightness(0.7) saturate(0.8) hue-rotate(190deg);
-        opacity: 0.9; pointer-events: none; 
+        filter: brightness(0.5) saturate(0.6) hue-rotate(195deg); 
+        pointer-events: none; opacity: 0.8; 
     }
 
     /* --- DOTS --- */
     .dot {
-      position: absolute; width: 12px; height: 12px; border-radius: 50%; transform: translate(-50%, -50%); cursor: pointer;
-      border: 1px solid rgba(255,255,255,0.5); transition: 0.3s; z-index: 20;
+      position: absolute; width: 11px; height: 11px; border-radius: 50%; transform: translate(-50%, -50%); cursor: pointer;
+      border: 1px solid rgba(255,255,255,0.3); transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
-    .dot:hover { transform: translate(-50%, -50%) scale(2); z-index: 30; box-shadow: 0 0 15px currentColor; }
-    .dot.selected { transform: translate(-50%, -50%) scale(2.5); border: 2px solid #fff; z-index: 31; box-shadow: 0 0 20px currentColor; }
+    .dot:hover { transform: translate(-50%, -50%) scale(2.2); z-index: 10; box-shadow: 0 0 15px currentColor; }
+    .dot.selected { transform: translate(-50%, -50%) scale(2.5); border: 2px solid #fff; z-index: 11; box-shadow: 0 0 20px currentColor; }
     
     .dot-low { background: var(--low); color: var(--low); }
     .dot-medium { background: var(--medium); color: var(--medium); }
@@ -73,17 +88,20 @@
     .panel-content::-webkit-scrollbar { width: 4px; }
     .panel-content::-webkit-scrollbar-thumb { background: var(--border); }
 
-    /* UI Components */
     .section-title { font-family: var(--mono); font-size: 0.7rem; color: var(--accent); border-bottom: 1px solid var(--border); padding-bottom: 6px; margin: 1.5rem 0 12px 0; letter-spacing: 1px; text-transform: uppercase; }
+    .leaderboard-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer; }
+    .leaderboard-item:hover { color: var(--accent); }
+
+    /* News Module */
+    .news-card { border-left: 3px solid var(--high); padding: 10px 12px; background: rgba(255,255,255,0.02); margin-bottom: 12px; border-radius: 0 4px 4px 0; border: 1px solid var(--border); border-left-width: 3px; }
+    .news-time { font-family: var(--mono); font-size: 0.6rem; color: var(--muted); margin-bottom: 6px; display: flex; justify-content: space-between; }
+    .news-text { font-size: 0.85rem; line-height: 1.4; color: #cbd5e1; margin-bottom: 8px; }
+    .news-link { color: var(--accent); font-family: var(--mono); font-size: 0.65rem; text-decoration: none; font-weight: bold; }
+    .news-link:hover { text-decoration: underline; }
+
     .score-hero { background: var(--surface-light); padding: 1.5rem; border-radius: 8px; border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
     .hero-val { font-family: var(--mono); font-size: 2.5rem; font-weight: bold; color: var(--accent); line-height: 1; }
     .hero-label { font-size: 0.65rem; color: var(--muted); font-family: var(--mono); text-transform: uppercase; }
-
-    .news-card { border-left: 3px solid var(--high); padding: 10px 12px; background: rgba(255,255,255,0.02); margin-bottom: 12px; border: 1px solid var(--border); border-left-width: 3px; }
-    .news-time { font-family: var(--mono); font-size: 0.6rem; color: var(--muted); margin-bottom: 4px; display: flex; justify-content: space-between; }
-    .news-text { font-size: 0.8rem; line-height: 1.4; color: #cbd5e1; }
-    .news-link { color: var(--accent); font-family: var(--mono); font-size: 0.65rem; text-decoration: none; font-weight: bold; }
-
     .chart-box { height: 250px; margin-bottom: 1.5rem; }
     .back-btn { background: transparent; border: none; color: var(--accent); font-family: var(--mono); font-size: 0.7rem; cursor: pointer; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 8px; }
 
@@ -95,13 +113,29 @@
 <header>
   <div class="logo-group">
     <div class="logo-box">GR</div>
-    <div class="logo-text"><h1>Geo Risk Terminal</h1></div>
+    <div class="logo-text">
+      <h1>Geo Risk Terminal</h1>
+    </div>
   </div>
   <div class="header-stats">
     <div class="stat-item"><div class="stat-label">Coverage</div><div class="stat-value">195 Countries</div></div>
-    <div class="stat-item"><div class="stat-label">System</div><div class="stat-value" style="color:var(--low)">ACTIVE</div></div>
+    <div class="stat-item"><div class="stat-label">Data Sources</div><div class="stat-value">340+ Active</div></div>
+    <div class="stat-item"><div class="stat-label">System</div><div class="stat-value" style="color:var(--low)">ONLINE</div></div>
   </div>
 </header>
+
+<div class="toolbar">
+  <div class="search-container">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="searchInput" placeholder="Search system terminal...">
+  </div>
+  <div class="filter-pills">
+    <button class="pill active" data-filter="all">GLOBAL</button>
+    <button class="pill" data-filter="high">CRITICAL</button>
+    <button class="pill" data-filter="medium">TRANSITIONAL</button>
+    <button class="pill" data-filter="low">STABLE</button>
+  </div>
+</div>
 
 <div class="app-container">
   <main class="map-area">
@@ -118,6 +152,7 @@
 </div>
 
 <script>
+// --- CONFIGURATION ---
 const DIMENSIONS = ["Political", "Conflict", "Sanctions", "Unrest", "Terrorism", "Legal"];
 
 const DATA = {
@@ -128,17 +163,24 @@ const DATA = {
   "US": { name: "United States", lat: 37.1, lon: -95.7, vals: [40, 30, 10, 55, 35, 25], trend: "up" },
   "IN": { name: "India", lat: 20.6, lon: 78.9, vals: [35, 40, 15, 50, 45, 40], trend: "stable" },
   "CN": { name: "China", lat: 35.8, lon: 104.1, vals: [30, 50, 60, 40, 30, 60], trend: "up" },
-  "IL": { name: "Israel", lat: 31.0, lon: 34.8, vals: [70, 95, 20, 65, 90, 45], trend: "up" },
+  "BR": { name: "Brazil", lat: -14.2, lon: -51.9, vals: [50, 40, 10, 65, 20, 55], trend: "stable" },
+  "MX": { name: "Mexico", lat: 23.6, lon: -102.5, vals: [65, 75, 10, 60, 80, 70], trend: "up" },
+  "GB": { name: "United Kingdom", lat: 55.4, lon: -3.4, vals: [25, 15, 10, 40, 35, 20], trend: "stable" },
   "ZA": { name: "South Africa", lat: -30.5, lon: 22.9, vals: [60, 35, 15, 80, 20, 55], trend: "up" },
   "IR": { name: "Iran", lat: 32.4, lon: 53.6, vals: [75, 65, 95, 70, 55, 80], trend: "up" },
-  "KP": { name: "North Korea", lat: 40.3, lon: 127.5, vals: [85, 75, 99, 30, 20, 95], trend: "stable" }
+  "KP": { name: "North Korea", lat: 40.3, lon: 127.5, vals: [85, 75, 99, 30, 20, 95], trend: "stable" },
+  "IL": { name: "Israel", lat: 31.0, lon: 34.8, vals: [70, 95, 20, 65, 90, 45], trend: "up" },
+  "FR": { name: "France", lat: 46.2, lon: 2.2, vals: [35, 10, 5, 55, 30, 15], trend: "up" },
+  "MM": { name: "Myanmar", lat: 21.9, lon: 95.9, vals: [90, 95, 80, 85, 75, 85], trend: "up" }
 };
 
 const NEWS = [
   { time: "06:14 UTC", text: "Escalation in maritime corridor — Strait of Hormuz.", source: "Reuters", link: "https://reuters.com", type: "high" },
-  { time: "04:52 UTC", text: "New sanctions package targeting energy sector exports.", source: "Bloomberg", link: "https://bloomberg.com", type: "high" }
+  { time: "04:52 UTC", text: "New sanctions package targeting energy sector exports.", source: "Bloomberg", link: "https://bloomberg.com", type: "high" },
+  { time: "03:30 UTC", text: "Protest movement expands to 4 additional regions.", source: "Al Jazeera", link: "https://aljazeera.com", type: "med" }
 ];
 
+// --- CORE LOGIC ---
 let radarChart = null;
 const MAP_BOUNDS = { top: 85, bottom: -60, left: -180, right: 180 };
 
@@ -154,17 +196,26 @@ const calcAvg = (vals) => Math.round(vals.reduce((a, b) => a + b, 0) / vals.leng
 function init() {
   renderDots();
   renderGlobalOverview();
+  
+  document.getElementById('searchInput').addEventListener('input', handleFilter);
+  document.querySelectorAll('.pill').forEach(p => p.addEventListener('click', e => {
+    document.querySelectorAll('.pill').forEach(b => b.classList.remove('active'));
+    e.target.classList.add('active');
+    handleFilter();
+  }));
 }
 
 function renderDots() {
   const container = document.getElementById('mapContainer');
+  document.querySelectorAll('.dot').forEach(d => d.remove());
+
   Object.entries(DATA).forEach(([code, country]) => {
     const avg = calcAvg(country.vals);
     const dot = document.createElement('div');
     dot.className = `dot ${avg > 70 ? 'dot-high dot-critical' : (avg > 40 ? 'dot-medium' : 'dot-low')}`;
     dot.dataset.code = code;
     const pos = latLonToPercent(country.lat, country.lon);
-    dot.style.left = pos.x + '%'; dot.style.top = pos.y + '%';
+    dot.style.left = `${pos.x}%`; dot.style.top = `${pos.y}%`;
 
     dot.addEventListener('mouseenter', (e) => showTooltip(e, country.name, avg));
     dot.addEventListener('mouseleave', hideTooltip);
@@ -173,54 +224,98 @@ function renderDots() {
   });
 }
 
+function handleFilter() {
+  const query = document.getElementById('searchInput').value.toLowerCase();
+  const filter = document.querySelector('.pill.active').dataset.filter;
+  document.querySelectorAll('.dot').forEach(dot => {
+    const country = DATA[dot.dataset.code];
+    const score = calcAvg(country.vals);
+    const riskLabel = score > 70 ? 'high' : (score > 40 ? 'medium' : 'low');
+    const matchesSearch = country.name.toLowerCase().includes(query);
+    const matchesPill = filter === 'all' || filter === riskLabel;
+    dot.style.display = (matchesSearch && matchesPill) ? 'block' : 'none';
+  });
+}
+
 function renderGlobalOverview() {
   if (radarChart) { radarChart.destroy(); radarChart = null; }
   document.querySelectorAll('.dot').forEach(d => d.classList.remove('selected'));
 
+  const criticalOnes = Object.entries(DATA)
+    .map(([code, d]) => ({ code, name: d.name, score: calcAvg(d.vals) }))
+    .sort((a,b) => b.score - a.score).slice(0, 6);
+
   document.getElementById('panelContent').innerHTML = `
     <h2 style="font-size:1.3rem; margin-bottom:1.5rem; letter-spacing:1px;">COMMAND CENTER</h2>
+    
     <div class="score-hero">
-      <div><div class="hero-label">Global Risk Avg</div><div class="hero-val">64</div></div>
+      <div>
+        <div class="hero-label">Global Risk Avg</div>
+        <div class="hero-val">64</div>
+      </div>
       <div style="text-align:right; font-family:var(--mono); color:var(--high); font-size:0.8rem">↑ +2.1%</div>
     </div>
+
     <div class="section-title">Critical Risk Leaderboard</div>
-    ${Object.entries(DATA).sort((a,b) => calcAvg(b[1].vals) - calcAvg(a[1].vals)).slice(0,5).map(([code, c]) => `
-      <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.05); cursor:pointer" onclick="selectCountry('${code}')">
-        <span style="font-size:0.85rem">${c.name}</span>
-        <span style="font-family:var(--mono); font-weight:bold; color:var(--high)">${calcAvg(c.vals)}</span>
+    ${criticalOnes.map((c, i) => `
+      <div class="leaderboard-item" onclick="selectCountry('${c.code}')">
+        <span style="font-size:0.85rem">${i+1}. ${c.name}</span>
+        <span class="risk-score-badge" style="color:${c.score > 70 ? 'var(--high)' : 'var(--medium)'}">${c.score}</span>
       </div>
     `).join('')}
-    <div class="section-title">Active Intelligence Feed</div>
-    ${NEWS.map(n => `<div class="news-card"><div class="news-time"><span>${n.time}</span><span>${n.source}</span></div><div class="news-text">${n.text}</div></div>`).join('')}
+
+    <div class="section-title">Live Intelligence Feed</div>
+    ${NEWS.map(n => `
+      <div class="news-card" style="border-left-color: ${n.type === 'high' ? 'var(--high)' : 'var(--medium)'}">
+        <div class="news-time">
+            <span>${n.time}</span>
+            <span style="color:var(--accent)">Source: ${n.source}</span>
+        </div>
+        <div class="news-text">${n.text}</div>
+        <a href="${n.link}" target="_blank" class="news-link">READ FULL SOURCE ↗</a>
+      </div>
+    `).join('')}
   `;
 }
 
 function selectCountry(code) {
   const country = DATA[code];
   const score = calcAvg(country.vals);
+
   document.querySelectorAll('.dot').forEach(d => d.classList.remove('selected'));
   document.querySelector(`[data-code="${code}"]`).classList.add('selected');
 
   document.getElementById('panelContent').innerHTML = `
     <button class="back-btn" onclick="renderGlobalOverview()">← BACK TO GLOBAL</button>
+    
     <div style="display:flex; align-items:center; gap:12px; margin-bottom:1rem">
       <img src="https://flagcdn.com/w80/${code.toLowerCase()}.png" style="width:35px; border-radius:2px">
       <h2 style="font-size:1.6rem; letter-spacing:1px;">${country.name}</h2>
     </div>
+
     <div class="score-hero">
-      <div><div class="hero-label">Composite Index</div><div class="hero-val" style="color:${score > 70 ? 'var(--high)' : 'var(--low)')}">${score}</div></div>
+      <div>
+        <div class="hero-label">Composite Index</div>
+        <div class="hero-val" style="color:${score > 70 ? 'var(--high)' : (score > 40 ? 'var(--medium)' : 'var(--low)')}">${score}</div>
+      </div>
       <div style="text-align:right; font-family:var(--mono); font-size:0.8rem">${country.trend === 'up' ? '▲ RISING' : '● STABLE'}</div>
     </div>
+
     <div class="section-title">Threat Radar</div>
     <div class="chart-box"><canvas id="radarChart"></canvas></div>
+
     <div class="section-title">Metric Breakdown</div>
-    ${DIMENSIONS.map((dim, i) => `
-      <div style="display:flex; justify-content:space-between; font-size:0.75rem; margin-top:10px;">
-        <span style="color:var(--muted); font-family:var(--mono);">${dim.toUpperCase()}</span>
-        <span style="font-weight:bold">${country.vals[i]}</span>
-      </div>
-      <div style="height:4px; background:#0f172a; border-radius:2px;"><div style="height:100%; width:${country.vals[i]}%; background:var(--accent); border-radius:2px;"></div></div>
-    `).join('')}
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      ${DIMENSIONS.map((dim, i) => `
+        <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.75rem;">
+          <span style="color:var(--muted); font-family:var(--mono);">${dim.toUpperCase()}</span>
+          <span style="font-weight:bold">${country.vals[i]}</span>
+        </div>
+        <div style="height:4px; background:#0f172a; border-radius:2px;">
+          <div style="height:100%; width:${country.vals[i]}%; background:${country.vals[i] > 70 ? 'var(--high)' : (country.vals[i] > 40 ? 'var(--medium)' : 'var(--low)')}; border-radius:2px;"></div>
+        </div>
+      `).join('')}
+    </div>
   `;
   renderChart(country.vals);
 }
@@ -231,12 +326,26 @@ function renderChart(vals) {
     type: 'radar',
     data: {
       labels: DIMENSIONS,
-      datasets: [{ data: vals, backgroundColor: 'rgba(0, 212, 255, 0.1)', borderColor: '#00d4ff', borderWidth: 2, pointBackgroundColor: '#00d4ff' }]
+      datasets: [{
+        data: vals,
+        backgroundColor: 'rgba(0, 212, 255, 0.1)',
+        borderColor: '#00d4ff',
+        borderWidth: 2,
+        pointBackgroundColor: '#00d4ff'
+      }]
     },
     options: {
-      scales: { r: { min: 0, max: 100, ticks: { display: false }, grid: { color: '#1e3050' }, angleLines: { color: '#1e3050' }, pointLabels: { color: '#94a3b8', font: { family: 'Share Tech Mono', size: 9 } } } },
+      scales: {
+        r: {
+          min: 0, max: 100, ticks: { display: false },
+          grid: { color: '#1e3050' },
+          angleLines: { color: '#1e3050' },
+          pointLabels: { color: '#94a3b8', font: { family: 'Share Tech Mono', size: 9 } }
+        }
+      },
       plugins: { legend: { display: false } },
-      responsive: true, maintainAspectRatio: false
+      responsive: true,
+      maintainAspectRatio: false
     }
   });
 }
