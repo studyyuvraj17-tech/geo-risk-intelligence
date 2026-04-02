@@ -11,18 +11,19 @@
 
 <header>
   <h1>Geo Risk Intelligence</h1>
-  <p>Mapping Global Geopolitical Risk</p>
+  <p>Global Geopolitical Risk Dashboard</p>
 </header>
 
 <section class="map-section">
-  <h2>Select a Country</h2>
-  <div class="map">
-    <button onclick="showCountry('India')">India</button>
-    <button onclick="showCountry('Pakistan')">Pakistan</button>
-    <button onclick="showCountry('USA')">USA</button>
-    <button onclick="showCountry('China')">China</button>
-    <button onclick="showCountry('Russia')">Russia</button>
-  </div>
+  <h2>Global Risk Map</h2>
+
+  <svg viewBox="0 0 800 400" class="world-map">
+    <rect x="500" y="200" width="40" height="40" class="country" onclick="showCountry('India')" />
+    <rect x="470" y="200" width="30" height="40" class="country" onclick="showCountry('Pakistan')" />
+    <rect x="150" y="150" width="60" height="40" class="country" onclick="showCountry('USA')" />
+    <rect x="550" y="180" width="50" height="40" class="country" onclick="showCountry('China')" />
+    <rect x="500" y="100" width="100" height="50" class="country" onclick="showCountry('Russia')" />
+  </svg>
 </section>
 
 <section id="dashboard" class="hidden">
@@ -30,11 +31,14 @@
   <p id="analysis"></p>
 
   <div class="score-box">
-    <h3>Geopolitical Risk Index: <span id="score"></span></h3>
+    <h3>Risk Score: <span id="score"></span></h3>
     <p id="risk-level"></p>
   </div>
 
-  <div id="dimensions" class="dimensions"></div>
+  <!-- RADAR CHART -->
+  <canvas id="radarChart" width="300" height="300"></canvas>
+
+  <div id="dimensions"></div>
 </section>
 
 <footer>
